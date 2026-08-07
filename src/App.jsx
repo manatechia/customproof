@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { CATALOG, CATS, STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
+import { CATALOG, STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
+import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
@@ -7,9 +8,16 @@ const MARQUEE = 'STICKERS DIE-CUT ★ TAZAS MÁGICAS ★ REMERAS DTF ★ VINILO 
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
+  const [catalog, setCatalog] = useState(CATALOG)
   const [cat, setCat] = useState('Todo')
   const [cart, setCart] = useState([])
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    let alive = true
+    fetchCatalog().then((products) => { if (alive) setCatalog(products) })
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -22,7 +30,8 @@ export default function App() {
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  const shown = CATALOG.filter((p) => cat === 'Todo' || p.cat === cat)
+  const cats = ['Todo', ...new Set(catalog.map((p) => p.cat))]
+  const shown = catalog.filter((p) => cat === 'Todo' || p.cat === cat)
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const total = cart.reduce((a, c) => a + c.price * c.qty, 0)
 
@@ -46,7 +55,7 @@ export default function App() {
 
   const checkout = () => {
     if (!cart.length) return
-    const lines = cart.map((c) => `• ${c.qty}x ${c.name} (${c.opt}) — ${eur(c.price * c.qty)}`)
+    const lines = cart.map((c) => `• ${c.qty}x ${c.name}${c.opt ? ` (${c.opt})` : ''} — ${eur(c.price * c.qty)}`)
     const msg = `¡Hola Custom Proof! Quiero hacer este pedido:\n\n${lines.join('\n')}\n\nTotal estimado: ${eur(total)}\n\nTe paso los diseños por acá 👇`
     window.open(waLink(msg), '_blank')
   }
@@ -108,7 +117,7 @@ export default function App() {
         <div className="catalog-head">
           <h2 className="section-title">El catálogo</h2>
           <div className="cats">
-            {CATS.map((c) => (
+            {cats.map((c) => (
               <button
                 key={c}
                 className={`cat-btn${c === cat ? ' active' : ''}`}
@@ -123,8 +132,10 @@ export default function App() {
           {shown.map((p) => (
             <article className="card" key={p.id}>
               <div className="card-shot">
-                <span className="placeholder-note">{p.shot}</span>
-                <span className="card-tag" style={{ background: p.tint }}>{p.tag}</span>
+                {p.img
+                  ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
+                  : <span className="placeholder-note">{p.shot}</span>}
+                {p.tag && <span className="card-tag" style={{ background: p.tint }}>{p.tag}</span>}
               </div>
               <div className="card-body">
                 <div className="card-title-row">

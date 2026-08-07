@@ -22,7 +22,7 @@ export default function CartDrawer({ open, cart, total, onClose, onBump, onCheck
                 <div className="cart-swatch" style={{ background: c.tint }} />
                 <div className="cart-item-body">
                   <div className="cart-item-name">{c.name}</div>
-                  <div className="cart-item-opt">{c.opt}</div>
+                  {c.opt && <div className="cart-item-opt">{c.opt}</div>}
                   <div className="cart-item-row">
                     <button className="qty-btn" onClick={() => onBump(i, -1)}>−</button>
                     <span className="cart-qty">{c.qty}</span>
