@@ -42,7 +42,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 /* Header */
 .header { position: sticky; top: 0; z-index: 40; background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 2px solid var(--line-1); }
 .header-inner { padding-top: 10px; padding-bottom: 10px; display: flex; align-items: center; gap: 24px; }
-.logo-img { height: 64px; width: auto; display: block; background: #000; border-radius: 14px; }
+.logo-img { height: 56px; width: auto; display: block; }
 .nav { display: flex; gap: 22px; margin-left: auto; align-items: center; font-family: 'Fredoka', sans-serif; font-size: 16px; }
 .nav a { color: var(--ink); }
 .theme-btn { background: transparent; color: var(--ink); border: 2px solid var(--line-3); border-radius: 999px; width: 40px; height: 40px; font-size: 17px; cursor: pointer; flex: none; }
@@ -116,7 +116,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 /* Footer */
 .footer { border-top: 2px solid var(--line-1); background: var(--footer-bg); }
 .footer-grid { padding-top: 48px; padding-bottom: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; align-items: start; }
-.footer-logo { height: 88px; width: auto; display: block; background: #000; border-radius: 18px; }
+.footer-logo { height: 80px; width: auto; display: block; }
 .footer-about { color: var(--muted-4); font-size: 14px; margin: 10px 0 0; max-width: 32ch; }
 .footer h4 { font-weight: 600; font-size: 17px; margin: 0 0 12px; color: var(--ink); }
 .contact-links { display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
