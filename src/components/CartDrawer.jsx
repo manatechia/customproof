@@ -1,6 +1,6 @@
 import { eur } from '../data.js'
 
-export default function CartDrawer({ open, cart, total, onClose, onBump, onCheckout }) {
+export default function CartDrawer({ open, cart, total, onClose, onBump, onCheckout, onPay, paying }) {
   return (
     <>
       <div className={`overlay${open ? ' open' : ''}`} onClick={onClose} />
@@ -40,8 +40,11 @@ export default function CartDrawer({ open, cart, total, onClose, onBump, onCheck
             <span>Total estimado</span>
             <span className="total">{eur(total)}</span>
           </div>
-          <p className="drawer-note">Envío gratis a Barcelona en compras superiores a 25€. El envío al resto y los descuentos por cantidad se confirman en el chat. No se cobra nada desde la web.</p>
-          <button className="checkout-btn" onClick={onCheckout}>Finalizar por WhatsApp</button>
+          <p className="drawer-note">Envío gratis a Barcelona en compras superiores a 25€. El envío al resto y los descuentos por cantidad se confirman en el chat. Pagá con tarjeta de forma segura (Stripe) o coordiná el pago por WhatsApp.</p>
+          <button className="pay-btn" onClick={onPay} disabled={paying}>
+            {paying ? 'Redirigiendo…' : 'Pagar con tarjeta'}
+          </button>
+          <button className="checkout-btn" onClick={onCheckout}>Pedir por WhatsApp</button>
         </div>
       </aside>
     </>

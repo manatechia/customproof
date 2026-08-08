@@ -10,8 +10,37 @@ export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
-  const [cart, setCart] = useState([])
+  /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
+  const [cart, setCart] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cp-cart')) || [] } catch { return [] }
+  })
   const [open, setOpen] = useState(false)
+  const [paying, setPaying] = useState(false)
+  const [orderOk, setOrderOk] = useState(null) /* { ref, lines } tras un pago exitoso */
+
+  useEffect(() => {
+    localStorage.setItem('cp-cart', JSON.stringify(cart))
+  }, [cart])
+
+  /* Vuelta de Stripe Checkout: /?pago=ok|cancelado */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const pago = params.get('pago')
+    if (pago === 'ok') {
+      const sid = params.get('session_id') || ''
+      let snapshot = []
+      try { snapshot = JSON.parse(localStorage.getItem('cp-cart')) || [] } catch { /* carrito ilegible */ }
+      setOrderOk({
+        ref: sid ? 'CP-' + sid.slice(-8).toUpperCase() : '',
+        lines: snapshot.map((c) => `• ${c.qty}x ${c.name}${c.opt ? ` (${c.opt})` : ''}`),
+      })
+      setCart([])
+      localStorage.removeItem('cp-cart')
+    } else if (pago === 'cancelado') {
+      setOpen(true)
+    }
+    if (pago) window.history.replaceState(null, '', window.location.pathname)
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -62,6 +91,25 @@ export default function App() {
     window.open(waLink(msg), '_blank')
   }
 
+  const payStripe = async () => {
+    if (!cart.length || paying) return
+    setPaying(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cart.map(({ id, opt, qty }) => ({ id, opt, qty })) }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.url) throw new Error(data.error || 'checkout failed')
+      window.location.assign(data.url)
+    } catch (e) {
+      console.warn('No se pudo iniciar el pago:', e)
+      setPaying(false)
+      alert('No se pudo iniciar el pago. Probá de nuevo o finalizá el pedido por WhatsApp.')
+    }
+  }
+
   return (
     <div className="page">
       <header className="header">
@@ -95,7 +143,7 @@ export default function App() {
           </h1>
           <p className="hero-sub">
             Stickers die-cut, tazas y remeras personalizadas. Elegís, agregás al carrito y
-            confirmamos todo por WhatsApp — sin registros ni pagos online.
+            confirmamos todo por WhatsApp — pagá con tarjeta o coordiná por chat.
           </p>
           <div className="hero-cta">
             <a href="#productos" className="btn-cyan">Ver productos</a>
@@ -230,7 +278,7 @@ export default function App() {
             <div className="footer-info">
               <span>Producción: 24hs a 48hs</span>
               <span>Envío a toda España</span>
-              <span>Pago por transferencia o Bizum</span>
+              <span>Pago con tarjeta, transferencia o Bizum</span>
             </div>
           </div>
         </div>
@@ -255,7 +303,32 @@ export default function App() {
         onClose={() => setOpen(false)}
         onBump={bump}
         onCheckout={checkout}
+        onPay={payStripe}
+        paying={paying}
       />
+
+      {orderOk && (
+        <div className="success-overlay" onClick={() => setOrderOk(null)}>
+          <div className="success-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="success-emoji">🎉</div>
+            <h3 className="success-title">¡Pago recibido!</h3>
+            {orderOk.ref && <div className="success-ref">Pedido {orderOk.ref}</div>}
+            <p className="success-text">
+              Ya registramos tu compra. Ahora pasanos tus diseños por WhatsApp para que
+              arranquemos con la producción.
+            </p>
+            <a
+              href={waLink(`¡Hola Custom Proof! Acabo de pagar el pedido${orderOk.ref ? ` ${orderOk.ref}` : ''} 🎉${orderOk.lines.length ? `\n\n${orderOk.lines.join('\n')}` : ''}\n\nTe paso los diseños por acá 👇`)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="wa-btn"
+            >
+              Enviar mis diseños por WhatsApp
+            </a>
+            <button className="success-close" onClick={() => setOrderOk(null)}>Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
