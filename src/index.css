@@ -166,19 +166,6 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .total-row { display: flex; justify-content: space-between; font-family: 'Fredoka', sans-serif; font-size: 20px; }
 .total-row .total { color: var(--yellow-text); }
 .drawer-note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted-3); }
-.pay-btn { background: var(--yellow); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 15px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
-.pay-btn:hover { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--yellow); }
-.pay-btn:disabled { opacity: .6; cursor: wait; }
 .checkout-btn { background: var(--wa); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 15px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
 .checkout-btn:hover { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--wa); }
-
-/* Modal de pago exitoso */
-.success-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .65); z-index: 70; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.success-modal { background: var(--panel-2); color: var(--ink); border: 2px solid var(--ink); border-radius: 28px; padding: 36px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 6px 6px 0 var(--celeste); }
-.success-emoji { font-size: 44px; }
-.success-title { font-weight: 700; font-size: 30px; margin: 10px 0 0; }
-.success-ref { display: inline-block; margin-top: 10px; background: var(--yellow); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 6px 16px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; }
-.success-text { font-size: 15.5px; line-height: 1.55; color: var(--muted); margin: 16px 0 0; }
-.success-modal .wa-btn { margin-top: 22px; border-color: var(--ink); box-shadow: 4px 4px 0 var(--ink); }
-.success-close { display: block; margin: 18px auto 0; background: transparent; color: var(--muted-2); border: none; font-size: 14px; cursor: pointer; text-decoration: underline; }
-.success-close:hover { color: var(--ink); }
+.checkout-btn:disabled { opacity: .6; cursor: wait; }
