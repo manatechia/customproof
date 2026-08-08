@@ -19,7 +19,7 @@ export function MailIcon({ size = 18 }) {
 export function SmileyIcon() {
   return (
     <svg viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="49" fill="#FFCC00" />
+      <circle cx="50" cy="50" r="49" fill="#ffcc29" />
       <ellipse cx="35" cy="37" rx="7.5" ry="12" transform="rotate(-14 35 37)" fill="#111" />
       <path d="M60 39 q9 -9 19 -4 q-8 1 -11 7" fill="none" stroke="#111" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M22 57 q-3 4 1 6 q26 22 53 1 q4 -3 0 -7" fill="none" stroke="#111" strokeWidth="7" strokeLinecap="round" />
