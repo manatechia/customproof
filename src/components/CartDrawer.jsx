@@ -40,7 +40,7 @@ export default function CartDrawer({ open, cart, total, onClose, onBump, onCheck
             <span>Total estimado</span>
             <span className="total">{eur(total)}</span>
           </div>
-          <p className="drawer-note">El envío y los descuentos por cantidad se confirman en el chat. No se cobra nada desde la web.</p>
+          <p className="drawer-note">Envío gratis a Barcelona en compras superiores a 25€. El envío al resto y los descuentos por cantidad se confirman en el chat. No se cobra nada desde la web.</p>
           <button className="checkout-btn" onClick={onCheckout}>Finalizar por WhatsApp</button>
         </div>
       </aside>
