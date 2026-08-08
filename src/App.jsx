@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { CATALOG, STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
+import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
-const MARQUEE = 'STICKERS DIE-CUT ★ TAZAS MÁGICAS ★ REMERAS DTF ★ VINILO RESISTENTE AL AGUA ★ PEDIDOS POR WHATSAPP ★ '
+const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA Y AL SOL ★ TAZAS PERSONALIZADAS ★ REMERAS CUSTOMIZADAS ★ ENVÍO GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ★ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
-  const [catalog, setCatalog] = useState(CATALOG)
+  const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
   const [cart, setCart] = useState([])
   const [open, setOpen] = useState(false)
@@ -30,8 +30,10 @@ export default function App() {
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  const cats = ['Todo', ...new Set(catalog.map((p) => p.cat))]
-  const shown = catalog.filter((p) => cat === 'Todo' || p.cat === cat)
+  const loading = catalog === null
+  const products = catalog ?? []
+  const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
+  const shown = products.filter((p) => cat === 'Todo' || p.cat === cat)
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const total = cart.reduce((a, c) => a + c.price * c.qty, 0)
 
@@ -117,19 +119,37 @@ export default function App() {
         <div className="catalog-head">
           <h2 className="section-title">El catálogo</h2>
           <div className="cats">
-            {cats.map((c) => (
-              <button
-                key={c}
-                className={`cat-btn${c === cat ? ' active' : ''}`}
-                onClick={() => setCat(c)}
-              >
-                {c}
-              </button>
-            ))}
+            {loading
+              ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
+              : cats.map((c) => (
+                  <button
+                    key={c}
+                    className={`cat-btn${c === cat ? ' active' : ''}`}
+                    onClick={() => setCat(c)}
+                  >
+                    {c}
+                  </button>
+                ))}
           </div>
         </div>
         <div className="grid">
-          {shown.map((p) => (
+          {loading && Array.from({ length: 6 }, (_, i) => (
+            <article className="card skel-card" key={i}>
+              <div className="card-shot skel-block" />
+              <div className="card-body">
+                <div className="card-title-row">
+                  <span className="skel-line" style={{ width: '55%' }} />
+                  <span className="skel-line" style={{ width: 64 }} />
+                </div>
+                <span className="skel-line" style={{ width: '90%' }} />
+                <span className="skel-line" style={{ width: '70%' }} />
+                <div className="card-actions">
+                  <span className="skel-btn" />
+                </div>
+              </div>
+            </article>
+          ))}
+          {!loading && shown.map((p) => (
             <article className="card" key={p.id}>
               <div className="card-shot">
                 {p.img

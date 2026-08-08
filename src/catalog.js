@@ -1,10 +1,14 @@
-import { CATALOG, YELLOW, CELESTE, VIOLET } from './data.js'
+import { YELLOW, CELESTE, PINK } from './data.js'
 
 const SHEET_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vT6w8HE9r2BL8QFnjV_1uyZ4J3TTK0Bmxmr5F-xiZdEEyXOBIifolbYxVCJUiDPSeqAUBWi9FxaaUmP/pub?gid=0&single=true&output=csv'
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vSdQD5qKGGjpUxYRVF5xKMXsasvhp44BQjNFpzTmjC4nQYdAMS8NOjG1baeZEUMptisyoGG_ieO9DPM/pub?gid=0&single=true&output=csv'
 
-const NAMED_COLORS = { amarillo: YELLOW, celeste: CELESTE, violeta: VIOLET }
-const TINT_CYCLE = [YELLOW, CELESTE, VIOLET]
+const NAMED_COLORS = {
+  amarillo: YELLOW, celeste: CELESTE, azul: CELESTE, rosa: PINK, violeta: PINK,
+  /* hex de la paleta vieja que pueda quedar en el sheet */
+  '#ffcc00': YELLOW, '#66ffcc': CELESTE, '#cc33ff': PINK,
+}
+const TINT_CYCLE = [YELLOW, CELESTE, PINK]
 
 /* Parser CSV con soporte de campos entre comillas (comas y saltos de línea internos) */
 function parseCsv(text) {
@@ -97,15 +101,14 @@ function rowsToProducts(rows) {
   return products
 }
 
-/* Devuelve el catálogo del sheet, o el local si falla o viene vacío */
+/* Devuelve el catálogo del sheet; si falla o viene vacío, un catálogo vacío */
 export async function fetchCatalog() {
   try {
     const res = await fetch(SHEET_URL)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const products = rowsToProducts(parseCsv(await res.text()))
-    return products.length ? products : CATALOG
+    return rowsToProducts(parseCsv(await res.text()))
   } catch (e) {
-    console.warn('No se pudo cargar el catálogo del sheet, uso el local:', e)
-    return CATALOG
+    console.warn('No se pudo cargar el catálogo del sheet:', e)
+    return []
   }
 }
