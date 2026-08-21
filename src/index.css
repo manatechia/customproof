@@ -159,6 +159,55 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .float-wa:hover { transform: scale(1.08) rotate(6deg); }
 .float-wa svg { width: 100%; height: 100%; display: block; }
 
+/* Mobile
+   El sitio es fluido, pero abajo de ~720px el header no entra en una fila
+   (el carrito quedaba fuera de pantalla) y la tipografía de escritorio es
+   demasiado grande para 375px. */
+@media (max-width: 720px) {
+  .container { padding-left: 16px; padding-right: 16px; }
+
+  /* Logo a la izquierda, tema y carrito a la derecha, los links en una
+     segunda fila centrada */
+  .header-inner { flex-wrap: wrap; gap: 10px 14px; }
+  .logo-img { height: 44px; }
+  .theme-btn { margin-left: auto; }
+  .cart-btn { padding: 9px 15px; font-size: 15px; }
+  .nav { order: 3; width: 100%; margin-left: 0; justify-content: center; gap: 22px; font-size: 15px; }
+  .nav a { padding: 4px 0; }
+
+  /* Sus columnas mínimas (320px y 300px) no entran en un teléfono angosto y
+     el contenido se cortaba contra el borde: acá van siempre apiladas */
+  .hero { padding-top: 36px; padding-bottom: 28px; gap: 32px; grid-template-columns: 1fr; }
+  .hero-title { font-size: 46px; }
+  .hero-sub { font-size: 17px; margin-top: 16px; }
+  .hero-cta { margin-top: 24px; gap: 12px; }
+  /* Botones a todo el ancho: más fáciles de tocar que dos pastillas angostas */
+  .btn-cyan, .btn-ghost { flex: 1 1 100%; text-align: center; padding: 14px 24px; font-size: 17px; }
+
+  .section-title { font-size: 32px; }
+  .featured { padding-top: 40px; padding-bottom: 40px; }
+  /* En touch el carrusel se desliza con el dedo y la card que asoma ya lo
+     insinúa: las flechas solo ocupaban una fila entera del encabezado */
+  .featured-arrows { display: none; }
+  .catalog { padding-top: 44px; }
+  .catalog-head { gap: 16px; }
+
+  .cta-section { padding-top: 48px; padding-bottom: 48px; }
+  .cta-panel { padding: 28px; border-radius: 24px; gap: 28px; grid-template-columns: 1fr; }
+  .cta-title { font-size: 32px; }
+  .cta-text { font-size: 16.5px; }
+  .wa-btn { display: block; text-align: center; padding: 14px 22px; font-size: 16.5px; }
+
+  .steps-section { padding-bottom: 56px; }
+  .steps-section .section-title { margin-bottom: 24px; }
+
+  .footer-grid { padding-top: 36px; padding-bottom: 36px; gap: 28px; }
+  .footer-logo { height: 64px; }
+
+  /* Más chico y bajo para no taparle el botón Agregar a la última card */
+  .float-wa { width: 56px; height: 56px; bottom: 16px; right: 16px; }
+}
+
 /* Carrito */
 .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 50; opacity: 0; pointer-events: none; transition: opacity .25s; }
 .overlay.open { opacity: 1; pointer-events: auto; }
