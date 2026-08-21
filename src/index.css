@@ -192,6 +192,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .catalog { padding-top: 44px; }
   .catalog-head { gap: 16px; }
 
+  /* Catálogo de a dos por fila */
+  .grid { grid-template-columns: 1fr 1fr; margin-top: 24px; }
+
   .cta-section { padding-top: 48px; padding-bottom: 48px; }
   .cta-panel { padding: 28px; border-radius: 24px; gap: 28px; grid-template-columns: 1fr; }
   .cta-title { font-size: 32px; }
@@ -201,11 +204,38 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .steps-section { padding-bottom: 56px; }
   .steps-section .section-title { margin-bottom: 24px; }
 
-  .footer-grid { padding-top: 36px; padding-bottom: 36px; gap: 28px; }
-  .footer-logo { height: 64px; }
+  /* Footer compacto: bloques mas juntos y tipografia mas chica */
+  .footer-grid { padding-top: 26px; padding-bottom: 26px; gap: 18px; }
+  .footer-logo { height: 48px; }
+  .footer-about { font-size: 13.5px; margin-top: 8px; max-width: none; }
+  .footer h4 { font-size: 14.5px; margin-bottom: 7px; letter-spacing: .01em; }
+  .contact-links { font-size: 14px; gap: 6px; }
+  /* WhatsApp y mail son los dos CTA del footer: 18px de alto era muy poco para el dedo */
+  .contact-links a { padding: 4px 0; }
+  .contact-links svg { width: 18px; height: 18px; }
+  .footer-info { font-size: 13.5px; gap: 6px; }
+  .footer-bottom { padding: 12px 16px; font-size: 11.5px; line-height: 1.5; }
 
   /* Más chico y bajo para no taparle el botón Agregar a la última card */
   .float-wa { width: 56px; height: 56px; bottom: 16px; right: 16px; }
+}
+
+/* Teléfono: con dos columnas la card queda en ~160px, así que el interior se
+   achica y el precio pasa debajo del título en vez de pelear por la misma
+   línea. Solo el catálogo: las cards del carrusel siguen grandes. */
+@media (max-width: 560px) {
+  .grid { gap: 14px; }
+  .grid .card { border-radius: 18px; }
+  .grid .card-img { padding: 6px; }
+  .grid .card-tag { top: 8px; left: 8px; padding: 4px 9px; font-size: 10.5px; }
+  .grid .card-body { padding: 12px 12px 14px; gap: 8px; }
+  .grid .card-title-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .grid .card-name { font-size: 15.5px; }
+  .grid .card-price { font-size: 16px; }
+  .grid .card-desc { font-size: 12.5px; }
+  .grid .card-actions { padding-top: 2px; }
+  .grid .add-btn { padding: 9px 10px; font-size: 14px; }
+  .grid .skel-btn { height: 38px; }
 }
 
 /* Carrito */
