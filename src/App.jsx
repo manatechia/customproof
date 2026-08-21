@@ -45,9 +45,8 @@ export default function App() {
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
   const shown = products.filter((p) => cat === 'Todo' || p.cat === cat)
-  const featured = products
-    .filter((p) => p.dest)
-    .sort((a, b) => (a.destOrden ?? Infinity) - (b.destOrden ?? Infinity))
+  /* Los primeros 5 destacados, en el orden del catálogo (columna `orden` o el de la hoja) */
+  const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const total = cart.reduce((a, c) => a + c.price * c.qty, 0)
 
