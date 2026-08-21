@@ -167,40 +167,42 @@ export default function App() {
       </div>
 
       {!loading && featured.length > 0 && (
-        <section id="destacados" className="container featured">
-          <div className="featured-head">
-            <div className="featured-title">
-              <span className="featured-badge">DESTACADOS</span>
-              <h2 className="section-title">Top 5 de la semana</h2>
-            </div>
-            {!(edges.start && edges.end) && (
-              <div className="featured-arrows">
-                <button className="arrow-btn" aria-label="Anteriores" disabled={edges.start} onClick={() => slide(-1)}>‹</button>
-                <button className="arrow-btn" aria-label="Siguientes" disabled={edges.end} onClick={() => slide(1)}>›</button>
+        <div className="featured-band">
+          <section id="destacados" className="container featured">
+            <div className="featured-head">
+              <div className="featured-title">
+                <span className="featured-badge">DESTACADOS</span>
+                <h2 className="section-title">Top 5 de la semana</h2>
               </div>
-            )}
-          </div>
-          <div className="featured-track" ref={track} onScroll={syncEdges}>
-            {featured.map((p) => (
-              <article className="card" key={p.id}>
-                <div className="card-shot">
-                  {p.img
-                    ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
-                    : <span className="placeholder-note">{p.shot}</span>}
+              {!(edges.start && edges.end) && (
+                <div className="featured-arrows">
+                  <button className="arrow-btn" aria-label="Anteriores" disabled={edges.start} onClick={() => slide(-1)}>‹</button>
+                  <button className="arrow-btn" aria-label="Siguientes" disabled={edges.end} onClick={() => slide(1)}>›</button>
                 </div>
-                <div className="card-body">
-                  <div className="card-title-row">
-                    <h3 className="card-name">{p.name}</h3>
-                    <span className="card-price">{eur(p.opts[0].p)}</span>
+              )}
+            </div>
+            <div className="featured-track" ref={track} onScroll={syncEdges}>
+              {featured.map((p) => (
+                <article className="card" key={p.id}>
+                  <div className="card-shot">
+                    {p.img
+                      ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
+                      : <span className="placeholder-note">{p.shot}</span>}
                   </div>
-                  <div className="card-actions">
-                    <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                  <div className="card-body">
+                    <div className="card-title-row">
+                      <h3 className="card-name">{p.name}</h3>
+                      <span className="card-price">{eur(p.opts[0].p)}</span>
+                    </div>
+                    <div className="card-actions">
+                      <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
       )}
 
       <section id="productos" className="container catalog">
