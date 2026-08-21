@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
@@ -15,6 +15,9 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem('cp-cart')) || [] } catch { return [] }
   })
   const [open, setOpen] = useState(false)
+  const track = useRef(null)
+  /* Hacia qué lado se puede scrollear el carrusel; sin overflow no hay flechas */
+  const [edges, setEdges] = useState({ start: true, end: true })
   const [sending, setSending] = useState(false)
 
   useEffect(() => {
@@ -42,8 +45,32 @@ export default function App() {
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
   const shown = products.filter((p) => cat === 'Todo' || p.cat === cat)
+  const featured = products
+    .filter((p) => p.dest)
+    .sort((a, b) => (a.destOrden ?? Infinity) - (b.destOrden ?? Infinity))
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const total = cart.reduce((a, c) => a + c.price * c.qty, 0)
+
+  const syncEdges = () => {
+    const el = track.current
+    if (!el) return
+    const max = el.scrollWidth - el.clientWidth
+    setEdges({ start: el.scrollLeft <= 1, end: el.scrollLeft >= max - 1 })
+  }
+
+  const slide = (dir) => {
+    const el = track.current
+    if (!el) return
+    const card = el.firstElementChild
+    const step = card ? card.offsetWidth + 22 : el.clientWidth * 0.8
+    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    syncEdges()
+    window.addEventListener('resize', syncEdges)
+    return () => window.removeEventListener('resize', syncEdges)
+  }, [featured.length])
 
   const add = (p) => {
     const opt = p.opts[0]
@@ -139,6 +166,43 @@ export default function App() {
           <span>{MARQUEE + MARQUEE}</span>
         </div>
       </div>
+
+      {!loading && featured.length > 0 && (
+        <section id="destacados" className="container featured">
+          <div className="featured-head">
+            <div className="featured-title">
+              <span className="featured-badge">DESTACADOS</span>
+              <h2 className="section-title">Top 5 de la semana</h2>
+            </div>
+            {!(edges.start && edges.end) && (
+              <div className="featured-arrows">
+                <button className="arrow-btn" aria-label="Anteriores" disabled={edges.start} onClick={() => slide(-1)}>‹</button>
+                <button className="arrow-btn" aria-label="Siguientes" disabled={edges.end} onClick={() => slide(1)}>›</button>
+              </div>
+            )}
+          </div>
+          <div className="featured-track" ref={track} onScroll={syncEdges}>
+            {featured.map((p) => (
+              <article className="card" key={p.id}>
+                <div className="card-shot">
+                  {p.img
+                    ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
+                    : <span className="placeholder-note">{p.shot}</span>}
+                </div>
+                <div className="card-body">
+                  <div className="card-title-row">
+                    <h3 className="card-name">{p.name}</h3>
+                    <span className="card-price">{eur(p.opts[0].p)}</span>
+                  </div>
+                  <div className="card-actions">
+                    <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="productos" className="container catalog">
         <div className="catalog-head">
