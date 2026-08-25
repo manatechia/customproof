@@ -4,7 +4,7 @@ import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
-const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA Y AL SOL ★ TAZAS PERSONALIZADAS ★ REMERAS CUSTOMIZADAS ★ ENVÍO GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ★ '
+const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ☆ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
@@ -145,7 +145,7 @@ export default function App() {
             <span className="celeste">pegadas</span> <span className="yellow">e impresas</span>.
           </h1>
           <p className="hero-sub">
-            Stickers die-cut, tazas y remeras personalizadas. Elegís, agregás al carrito y
+            Stickers die-cut, tazas y camisetas personalizadas. Elegís, agregás al carrito y
             confirmamos todo por WhatsApp — sin registros ni pagos online.
           </p>
           <div className="hero-cta">
@@ -154,7 +154,7 @@ export default function App() {
           </div>
         </div>
         <div className="hero-art">
-          <span className="placeholder-note">foto lifestyle<br />stickers + taza + remera<br />1200×1200</span>
+          <img src="/hero.jpg" alt="Stickers personalizados pegados en termo, botella, taza, mate, funda de móvil y notebook" className="hero-img" width="1200" height="1195" fetchPriority="high" />
           <div className="hero-sticker">¡Desde 1 unidad!</div>
         </div>
       </section>
@@ -264,24 +264,19 @@ export default function App() {
 
       <section id="personalizado" className="container cta-section">
         <div className="cta-panel">
-          <div>
-            <h2 className="cta-title">¿Tenés tu propio diseño?</h2>
-            <p className="cta-text">
-              Mandanos el archivo por WhatsApp (PNG, JPG, PDF o vector) y te pasamos presupuesto
-              y vista previa antes de imprimir. También lo diseñamos nosotros si nos contás la idea.
-            </p>
-            <a
-              href={waLink('¡Hola Custom Proof! Quiero personalizar un producto con mi propio diseño. Les paso el archivo por acá 👇')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="wa-btn"
-            >
-              Enviar mi diseño por WhatsApp
-            </a>
-          </div>
-          <div className="cta-art">
-            <span className="placeholder-note">mockup diseño<br />del cliente</span>
-          </div>
+          <h2 className="cta-title">¿Tenés tu propio diseño?</h2>
+          <p className="cta-text">
+            Mandanos el archivo por WhatsApp (PNG, JPG, PDF o vector) y te pasamos presupuesto
+            y vista previa antes de imprimir. También lo diseñamos nosotros si nos contás la idea.
+          </p>
+          <a
+            href={waLink('¡Hola Custom Proof! Quiero personalizar un producto con mi propio diseño. Les paso el archivo por acá 👇')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="wa-btn"
+          >
+            Enviar mi diseño por WhatsApp
+          </a>
         </div>
       </section>
 
