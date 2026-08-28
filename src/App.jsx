@@ -188,7 +188,30 @@ export default function App() {
             </div>
           </div>
           <div className="hero-art">
-            <img src="/hero.jpg" alt="Stickers personalizados pegados en termo, botella, taza, mate, funda de móvil y notebook" className="hero-img" width="1200" height="1195" fetchPriority="high" />
+            {/* La imagen mas pesada del sitio y el LCP: AVIF/WebP con fallback a JPG,
+                y dos anchos porque en movil ocupa la mitad. Ver scripts/images.mjs */}
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/hero-700.avif 700w, /hero-1200.avif 1200w"
+                sizes="(max-width: 720px) 100vw, 570px"
+              />
+              <source
+                type="image/webp"
+                srcSet="/hero-700.webp 700w, /hero-1200.webp 1200w"
+                sizes="(max-width: 720px) 100vw, 570px"
+              />
+              <img
+                src="/hero-1200.jpg"
+                srcSet="/hero-700.jpg 700w, /hero-1200.jpg 1200w"
+                sizes="(max-width: 720px) 100vw, 570px"
+                alt="Stickers personalizados pegados en termo, botella, taza, mate, funda de móvil y notebook"
+                className="hero-img"
+                width="1200"
+                height="1195"
+                fetchPriority="high"
+              />
+            </picture>
             <div className="hero-sticker">¡Desde 1 unidad!</div>
           </div>
         </section>

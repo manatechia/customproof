@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview",
-    "prerender": "node scripts/prerender.mjs"
+    "prerender": "node scripts/prerender.mjs",
+    "images": "node scripts/images.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.5",
+    "sharp": "^0.35.4",
     "vite": "^8.2.1"
   }
 }
