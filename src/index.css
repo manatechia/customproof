@@ -10,7 +10,7 @@
   --muted: #b8b8bd; --muted-2: #9a9aa2; --muted-3: #6b6b73; --muted-4: #7a7a82; --muted-5: #8a8a92; --muted-6: #55555c;
   --line-1: #1c1c1f; --line-2: #26262c; --line-3: #33333a; --line-4: #3a3a40; --line-5: #22222a; --line-6: #17171b;
   --stripe-a: #0d0d10; --stripe-b: #15151a; --stripe-c: #141419;
-  --featured-bg: #C75EA3;
+  --featured-bg: #000;
   --yellow-text: #ffcc29; --celeste-text: #5bc5cf;
 }
 [data-theme="light"] {
@@ -19,7 +19,7 @@
   --muted: #4c4c55; --muted-2: #5e5e68; --muted-3: #83838c; --muted-4: #6f6f78; --muted-5: #75757e; --muted-6: #8f8f97;
   --line-1: #e6e6ea; --line-2: #d9d9df; --line-3: #c6c6cf; --line-4: #cfcfd6; --line-5: #e0e0e6; --line-6: #e9e9ed;
   --stripe-a: #ececef; --stripe-b: #f7f7f9; --stripe-c: #f2f2f5;
-  --featured-bg: #C75EA3;
+  --featured-bg: #fff;
   --yellow-text: #ffcc29; --celeste-text: #5bc5cf;
 }
 
@@ -71,7 +71,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .hero-sticker { position: absolute; top: -16px; right: -16px; background: var(--yellow); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 10px 18px; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 15px; transform: rotate(8deg); box-shadow: 3px 3px 0 var(--ink); }
 
 /* Marquee */
-.marquee { background: var(--pink); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); overflow: hidden; padding: 11px 0; }
+.marquee { background: var(--yellow); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); overflow: hidden; padding: 11px 0; }
 .marquee-track { display: flex; width: max-content; animation: cpmarquee 26s linear infinite; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; color: #000; white-space: nowrap; }
 .marquee-track span { padding-right: 28px; }
 
@@ -148,7 +148,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .footer-grid { padding-top: 48px; padding-bottom: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; align-items: start; }
 .footer-logo { height: 80px; width: auto; display: block; }
 .footer-about { color: var(--muted-4); font-size: 14px; margin: 10px 0 0; max-width: 32ch; }
-.footer h4 { font-weight: 600; font-size: 17px; margin: 0 0 12px; color: var(--ink); }
+.footer h3 { font-weight: 600; font-size: 17px; margin: 0 0 12px; color: var(--ink); }
 .contact-links { display: flex; flex-direction: column; gap: 10px; font-size: 15px; }
 .contact-links a { display: inline-flex; align-items: center; gap: 9px; }
 .contact-links svg { flex: none; }

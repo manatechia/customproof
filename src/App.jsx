@@ -137,170 +137,173 @@ export default function App() {
         </div>
       </header>
 
-      <section id="top" className="container hero">
-        <div>
-          <div className="hero-badge">HECHO A PEDIDO · ENVÍOS A TODA ESPAÑA</div>
-          <h1 className="hero-title">
-            Tus ideas,<br />
-            <span className="celeste">pegadas</span> <span className="yellow">e impresas</span>.
-          </h1>
-          <p className="hero-sub">
-            Stickers die-cut, tazas y camisetas personalizadas. Elegís, agregás al carrito y
-            confirmamos todo por WhatsApp — sin registros ni pagos online.
-          </p>
-          <div className="hero-cta">
-            <a href="#productos" className="btn-cyan">Ver productos</a>
-            <a href="#personalizado" className="btn-ghost">Mandá tu diseño</a>
+      <main>
+        <section id="top" className="container hero">
+          <div>
+            <div className="hero-badge">HECHO A PEDIDO EN BARCELONA · ENVÍOS A TODA ESPAÑA</div>
+            <h1 className="hero-title">
+              Tus ideas,{' '}<br />
+              <span className="celeste">pegadas</span> <span className="yellow">e impresas</span>.
+            </h1>
+            <p className="hero-sub">
+              Stickers die-cut, tazas y camisetas personalizadas. Elegís, agregás al carrito y
+              confirmamos todo por WhatsApp — sin registros ni pagos online.
+            </p>
+            <div className="hero-cta">
+              <a href="#productos" className="btn-cyan">Ver productos</a>
+              <a href="#personalizado" className="btn-ghost">Mandá tu diseño</a>
+            </div>
+          </div>
+          <div className="hero-art">
+            <img src="/hero.jpg" alt="Stickers personalizados pegados en termo, botella, taza, mate, funda de móvil y notebook" className="hero-img" width="1200" height="1195" fetchPriority="high" />
+            <div className="hero-sticker">¡Desde 1 unidad!</div>
+          </div>
+        </section>
+
+        <div className="marquee">
+          <div className="marquee-track">
+            <span>{MARQUEE + MARQUEE}</span>
+            <span aria-hidden="true">{MARQUEE + MARQUEE}</span>
           </div>
         </div>
-        <div className="hero-art">
-          <img src="/hero.jpg" alt="Stickers personalizados pegados en termo, botella, taza, mate, funda de móvil y notebook" className="hero-img" width="1200" height="1195" fetchPriority="high" />
-          <div className="hero-sticker">¡Desde 1 unidad!</div>
-        </div>
-      </section>
 
-      <div className="marquee">
-        <div className="marquee-track">
-          <span>{MARQUEE + MARQUEE}</span>
-          <span>{MARQUEE + MARQUEE}</span>
-        </div>
-      </div>
-
-      {!loading && featured.length > 0 && (
-        <div className="featured-band">
-          <section id="destacados" className="container featured">
-            <div className="featured-head">
-              <div className="featured-title">
-                <span className="featured-badge">DESTACADOS</span>
-                <h2 className="section-title">Top 5 de la semana</h2>
-              </div>
-              {!(edges.start && edges.end) && (
-                <div className="featured-arrows">
-                  <button className="arrow-btn" aria-label="Anteriores" disabled={edges.start} onClick={() => slide(-1)}>‹</button>
-                  <button className="arrow-btn" aria-label="Siguientes" disabled={edges.end} onClick={() => slide(1)}>›</button>
+        {!loading && featured.length > 0 && (
+          <div className="featured-band">
+            <section id="destacados" className="container featured">
+              <div className="featured-head">
+                <div className="featured-title">
+                  <span className="featured-badge">DESTACADOS</span>
+                  <h2 className="section-title">Top 5 de la semana</h2>
                 </div>
-              )}
-            </div>
-            <div className="featured-track" ref={track} onScroll={syncEdges}>
-              {featured.map((p) => (
-                <article className="card" key={p.id}>
-                  <div className="card-shot">
-                    {p.img
-                      ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
-                      : <span className="placeholder-note">{p.shot}</span>}
+                {!(edges.start && edges.end) && (
+                  <div className="featured-arrows">
+                    <button className="arrow-btn" aria-label="Anteriores" disabled={edges.start} onClick={() => slide(-1)}>‹</button>
+                    <button className="arrow-btn" aria-label="Siguientes" disabled={edges.end} onClick={() => slide(1)}>›</button>
                   </div>
-                  <div className="card-body">
-                    <div className="card-title-row">
-                      <h3 className="card-name">{p.name}</h3>
-                      <span className="card-price">{eur(p.opts[0].p)}</span>
+                )}
+              </div>
+              <div className="featured-track" ref={track} onScroll={syncEdges}>
+                {featured.map((p) => (
+                  <article className="card" key={p.id}>
+                    <div className="card-shot">
+                      {p.img
+                        ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" decoding="async" />
+                        : <span className="placeholder-note">{p.shot}</span>}
                     </div>
-                    <div className="card-actions">
-                      <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                    <div className="card-body">
+                      <div className="card-title-row">
+                        <h3 className="card-name">{p.name}</h3>
+                        <span className="card-price">{eur(p.opts[0].p)}</span>
+                      </div>
+                      <div className="card-actions">
+                        <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        </div>
-      )}
-
-      <section id="productos" className="container catalog">
-        <div className="catalog-head">
-          <h2 className="section-title">El catálogo</h2>
-          <div className="cats">
-            {loading
-              ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
-              : cats.map((c) => (
-                  <button
-                    key={c}
-                    className={`cat-btn${c === cat ? ' active' : ''}`}
-                    onClick={() => setCat(c)}
-                  >
-                    {c}
-                  </button>
+                  </article>
                 ))}
+              </div>
+            </section>
           </div>
-        </div>
-        <div className="grid">
-          {loading && Array.from({ length: 6 }, (_, i) => (
-            <article className="card skel-card" key={i}>
-              <div className="card-shot skel-block" />
-              <div className="card-body">
-                <div className="card-title-row">
-                  <span className="skel-line" style={{ width: '55%' }} />
-                  <span className="skel-line" style={{ width: 64 }} />
-                </div>
-                <span className="skel-line" style={{ width: '90%' }} />
-                <span className="skel-line" style={{ width: '70%' }} />
-                <div className="card-actions">
-                  <span className="skel-btn" />
-                </div>
-              </div>
-            </article>
-          ))}
-          {!loading && shown.map((p) => (
-            <article className="card" key={p.id}>
-              <div className="card-shot">
-                {p.img
-                  ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" />
-                  : <span className="placeholder-note">{p.shot}</span>}
-                {p.tag && <span className="card-tag" style={{ background: p.tint }}>{p.tag}</span>}
-              </div>
-              <div className="card-body">
-                <div className="card-title-row">
-                  <h3 className="card-name">{p.name}</h3>
-                  <span className="card-price">{eur(p.opts[0].p)}</span>
-                </div>
-                <p className="card-desc">{p.desc}</p>
-                <div className="card-actions">
-                  <button className="add-btn" onClick={() => add(p)}>Agregar</button>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+        )}
 
-      <section id="personalizado" className="container cta-section">
-        <div className="cta-panel">
-          <h2 className="cta-title">¿Tenés tu propio diseño?</h2>
-          <p className="cta-text">
-            Mandanos el archivo por WhatsApp (PNG, JPG, PDF o vector) y te pasamos presupuesto
-            y vista previa antes de imprimir. También lo diseñamos nosotros si nos contás la idea.
-          </p>
-          <a
-            href={waLink('¡Hola Custom Proof! Quiero personalizar un producto con mi propio diseño. Les paso el archivo por acá 👇')}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="wa-btn"
-          >
-            Enviar mi diseño por WhatsApp
-          </a>
-        </div>
-      </section>
-
-      <section id="como" className="container steps-section">
-        <h2 className="section-title">Cómo funciona</h2>
-        <div className="steps-grid">
-          {STEPS.map((s) => (
-            <div className="step-card" key={s.n}>
-              <div className="step-num" style={{ background: s.tint, color: s.fg }}>{s.n}</div>
-              <h3>{s.t}</h3>
-              <p>{s.d}</p>
+        <section id="productos" className="container catalog">
+          <div className="catalog-head">
+            <h2 className="section-title">El catálogo</h2>
+            <div className="cats">
+              {loading
+                ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
+                : cats.map((c) => (
+                    <button
+                      key={c}
+                      className={`cat-btn${c === cat ? ' active' : ''}`}
+                      aria-pressed={c === cat}
+                      onClick={() => setCat(c)}
+                    >
+                      {c}
+                    </button>
+                  ))}
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+          <div className="grid">
+            {loading && Array.from({ length: 6 }, (_, i) => (
+              <article className="card skel-card" key={i}>
+                <div className="card-shot skel-block" />
+                <div className="card-body">
+                  <div className="card-title-row">
+                    <span className="skel-line" style={{ width: '55%' }} />
+                    <span className="skel-line" style={{ width: 64 }} />
+                  </div>
+                  <span className="skel-line" style={{ width: '90%' }} />
+                  <span className="skel-line" style={{ width: '70%' }} />
+                  <div className="card-actions">
+                    <span className="skel-btn" />
+                  </div>
+                </div>
+              </article>
+            ))}
+            {!loading && shown.map((p) => (
+              <article className="card" key={p.id}>
+                <div className="card-shot">
+                  {p.img
+                    ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" decoding="async" />
+                    : <span className="placeholder-note">{p.shot}</span>}
+                  {p.tag && <span className="card-tag" style={{ background: p.tint }}>{p.tag}</span>}
+                </div>
+                <div className="card-body">
+                  <div className="card-title-row">
+                    <h3 className="card-name">{p.name}</h3>
+                    <span className="card-price">{eur(p.opts[0].p)}</span>
+                  </div>
+                  <p className="card-desc">{p.desc}</p>
+                  <div className="card-actions">
+                    <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="personalizado" className="container cta-section">
+          <div className="cta-panel">
+            <h2 className="cta-title">¿Tenés tu propio diseño?</h2>
+            <p className="cta-text">
+              Mandanos el archivo por WhatsApp (PNG, JPG, PDF o vector) y te pasamos presupuesto
+              y vista previa antes de imprimir.
+            </p>
+            <a
+              href={waLink('¡Hola Custom Proof! Quiero personalizar un producto con mi propio diseño. Les paso el archivo por acá 👇')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="wa-btn"
+            >
+              Enviar mi diseño por WhatsApp
+            </a>
+          </div>
+        </section>
+
+        <section id="como" className="container steps-section">
+          <h2 className="section-title">Cómo funciona</h2>
+          <div className="steps-grid">
+            {STEPS.map((s) => (
+              <div className="step-card" key={s.n}>
+                <div className="step-num" style={{ background: s.tint, color: s.fg }}>{s.n}</div>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
 
       <footer className="footer">
         <div className="container footer-grid">
           <div>
-            <img src="/logo.png" alt="Custom Proof" className="footer-logo" />
-            <p className="footer-about">Stickers y productos personalizados, hechos a pedido en España.</p>
+            <img src="/logo.png" alt="Custom Proof" className="footer-logo" loading="lazy" />
+            <p className="footer-about">Stickers y productos personalizados, hechos a pedido en Barcelona y con envío a toda España.</p>
           </div>
           <div>
-            <h4>Contacto</h4>
+            <h3>Contacto</h3>
             <div className="contact-links">
               <a href={waLink()} target="_blank" rel="noopener noreferrer">
                 <WhatsAppIcon /> <span>WhatsApp {PHONE_LABEL}</span>
@@ -311,7 +314,7 @@ export default function App() {
             </div>
           </div>
           <div>
-            <h4>Info</h4>
+            <h3>Info</h3>
             <div className="footer-info">
               <span>Producción: 24hs a 48hs</span>
               <span>Envío a toda España</span>
