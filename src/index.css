@@ -10,7 +10,7 @@
   --muted: #b8b8bd; --muted-2: #9a9aa2; --muted-3: #6b6b73; --muted-4: #7a7a82; --muted-5: #8a8a92; --muted-6: #55555c;
   --line-1: #1c1c1f; --line-2: #26262c; --line-3: #33333a; --line-4: #3a3a40; --line-5: #22222a; --line-6: #17171b;
   --stripe-a: #0d0d10; --stripe-b: #15151a; --stripe-c: #141419;
-  --featured-bg: #000;
+  --featured-bg: #C75EA3;
   --yellow-text: #ffcc29; --celeste-text: #5bc5cf;
 }
 [data-theme="light"] {
@@ -19,7 +19,7 @@
   --muted: #4c4c55; --muted-2: #5e5e68; --muted-3: #83838c; --muted-4: #6f6f78; --muted-5: #75757e; --muted-6: #8f8f97;
   --line-1: #e6e6ea; --line-2: #d9d9df; --line-3: #c6c6cf; --line-4: #cfcfd6; --line-5: #e0e0e6; --line-6: #e9e9ed;
   --stripe-a: #ececef; --stripe-b: #f7f7f9; --stripe-c: #f2f2f5;
-  --featured-bg: #fff;
+  --featured-bg: #C75EA3;
   --yellow-text: #ffcc29; --celeste-text: #5bc5cf;
 }
 
@@ -90,7 +90,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 /* Carrusel: scroll horizontal con snap y sin barra visible */
 .featured-track { display: flex; gap: 22px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 4px; }
 .featured-track::-webkit-scrollbar { display: none; }
-.featured-track .card { flex: 0 0 min(320px, 78vw); scroll-snap-align: start; }
+.featured-track .card { flex: 0 0 min(320px, 78vw); scroll-snap-align: start; background: var(--bg); }
 
 /* Catálogo */
 .catalog { padding-top: 64px; padding-bottom: 20px; }
