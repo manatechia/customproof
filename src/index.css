@@ -93,13 +93,21 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .featured-track .card { flex: 0 0 min(320px, 78vw); scroll-snap-align: start; background: var(--bg); }
 
 /* Catálogo */
-.catalog { padding-top: 64px; padding-bottom: 20px; }
+.catalog { padding-top: 64px; padding-bottom: 20px; scroll-margin-top: 80px; }
 .catalog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .section-title { font-weight: 700; font-size: 44px; margin: 0; letter-spacing: -.01em; }
 .cats { display: flex; gap: 10px; flex-wrap: wrap; }
 .cat-btn { background: transparent; color: var(--muted); border: 2px solid var(--line-3); border-radius: 999px; padding: 9px 18px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; cursor: pointer; }
 .cat-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-top: 32px; }
+/* Paginado del catálogo: mismo lenguaje que las flechas del carrusel */
+.pager { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 40px; }
+.pager-nums { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.page-btn { min-width: 46px; height: 46px; padding: 0 12px; border-radius: 999px; background: transparent; color: var(--muted); border: 2px solid var(--line-3); font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; cursor: pointer; }
+.page-btn:hover:not(.active) { border-color: var(--ink); color: var(--ink); }
+.page-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); cursor: default; }
+.pager-gap { color: var(--muted-3); padding: 0 2px; }
+
 .card { background: transparent; border: 2px solid var(--line-2); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; }
 .card:hover { border-color: var(--ink); }
 .card-shot { position: relative; aspect-ratio: 4/3; background: transparent; display: flex; align-items: center; justify-content: center; }
@@ -192,6 +200,10 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .featured-arrows { display: none; }
   .catalog { padding-top: 44px; }
   .catalog-head { gap: 16px; }
+
+  .pager { margin-top: 28px; gap: 8px; }
+  .page-btn { min-width: 40px; height: 40px; padding: 0 10px; font-size: 14px; }
+  .arrow-btn { width: 40px; height: 40px; font-size: 19px; }
 
   /* Catálogo de a dos por fila */
   .grid { grid-template-columns: 1fr 1fr; margin-top: 24px; }

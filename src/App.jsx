@@ -4,18 +4,36 @@ import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
+const PAGE_SIZE = 30
+
+/* 1 … 4 5 6 … 12: siempre los extremos y una ventana alrededor de la actual */
+function pageList(total, current) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const nums = [...new Set([1, current - 1, current, current + 1, total])]
+    .filter((n) => n >= 1 && n <= total)
+    .sort((a, b) => a - b)
+  const out = []
+  nums.forEach((n, i) => {
+    if (i && n - nums[i - 1] > 1) out.push('…')
+    out.push(n)
+  })
+  return out
+}
+
 const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ☆ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
+  const [page, setPage] = useState(1)
   /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cp-cart')) || [] } catch { return [] }
   })
   const [open, setOpen] = useState(false)
   const track = useRef(null)
+  const catalogTop = useRef(null)
   /* Hacia qué lado se puede scrollear el carrusel; sin overflow no hay flechas */
   const [edges, setEdges] = useState({ start: true, end: true })
   const [sending, setSending] = useState(false)
@@ -45,6 +63,10 @@ export default function App() {
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
   const shown = products.filter((p) => cat === 'Todo' || p.cat === cat)
+  const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE))
+  /* Derivado y no guardado: si el filtro achica el catálogo, la página se acota sola */
+  const current = Math.min(page, pages)
+  const pageItems = shown.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
   /* Los primeros 5 destacados, en el orden del catálogo (columna `orden` o el de la hoja) */
   const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
@@ -70,6 +92,17 @@ export default function App() {
     window.addEventListener('resize', syncEdges)
     return () => window.removeEventListener('resize', syncEdges)
   }, [featured.length])
+
+  const pickCat = (c) => {
+    setCat(c)
+    setPage(1)
+  }
+
+  /* Al cambiar de página el usuario está abajo del todo: lo subimos al catálogo */
+  const goPage = (n) => {
+    setPage(n)
+    catalogTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const add = (p) => {
     const opt = p.opts[0]
@@ -206,7 +239,7 @@ export default function App() {
           </div>
         )}
 
-        <section id="productos" className="container catalog">
+        <section id="productos" className="container catalog" ref={catalogTop}>
           <div className="catalog-head">
             <h2 className="section-title">El catálogo</h2>
             <div className="cats">
@@ -217,7 +250,7 @@ export default function App() {
                       key={c}
                       className={`cat-btn${c === cat ? ' active' : ''}`}
                       aria-pressed={c === cat}
-                      onClick={() => setCat(c)}
+                      onClick={() => pickCat(c)}
                     >
                       {c}
                     </button>
@@ -241,7 +274,7 @@ export default function App() {
                 </div>
               </article>
             ))}
-            {!loading && shown.map((p) => (
+            {!loading && pageItems.map((p) => (
               <article className="card" key={p.id}>
                 <div className="card-shot">
                   {p.img
@@ -262,6 +295,43 @@ export default function App() {
               </article>
             ))}
           </div>
+
+          {!loading && pages > 1 && (
+            <nav className="pager" aria-label="Paginación del catálogo">
+              <button
+                className="arrow-btn"
+                aria-label="Página anterior"
+                disabled={current === 1}
+                onClick={() => goPage(current - 1)}
+              >
+                ‹
+              </button>
+              <div className="pager-nums">
+                {pageList(pages, current).map((n, i) =>
+                  n === '…'
+                    ? <span className="pager-gap" key={`gap${i}`}>…</span>
+                    : (
+                        <button
+                          key={n}
+                          className={`page-btn${n === current ? ' active' : ''}`}
+                          aria-current={n === current ? 'page' : undefined}
+                          onClick={() => goPage(n)}
+                        >
+                          {n}
+                        </button>
+                      )
+                )}
+              </div>
+              <button
+                className="arrow-btn"
+                aria-label="Página siguiente"
+                disabled={current === pages}
+                onClick={() => goPage(current + 1)}
+              >
+                ›
+              </button>
+            </nav>
+          )}
         </section>
 
         <section id="personalizado" className="container cta-section">
