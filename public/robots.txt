@@ -1,4 +1,4 @@
-# Custom Proof — https://customproof.es
+# Custom Proof — https://www.customproof.es
 
 User-agent: *
 Allow: /
@@ -36,4 +36,4 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Sitemap: https://customproof.es/sitemap.xml
+Sitemap: https://www.customproof.es/sitemap.xml
