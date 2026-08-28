@@ -36,122 +36,18 @@
   <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- JSON-LD estático a propósito: los crawlers de IA no ejecutan JS, así que si esto
-       se inyectara desde React no lo leería ninguno. -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": "https://www.customproof.es/#website",
-        "url": "https://www.customproof.es/",
-        "name": "Custom Proof",
-        "inLanguage": "es",
-        "publisher": { "@id": "https://www.customproof.es/#business" }
-      },
-      {
-        "@type": "LocalBusiness",
-        "@id": "https://www.customproof.es/#business",
-        "name": "Custom Proof",
-        "description": "Stickers die-cut y productos personalizados hechos a pedido en Barcelona, con envío a toda España. Desde 1 unidad, sin registros ni pagos online: el pedido se confirma por WhatsApp.",
-        "url": "https://www.customproof.es/",
-        "logo": "https://www.customproof.es/logo.png",
-        "image": "https://www.customproof.es/hero.jpg",
-        "email": "customproof.es@gmail.com",
-        "telephone": "+34672019390",
-        "priceRange": "€",
-        "currenciesAccepted": "EUR",
-        "areaServed": [
-          { "@type": "City", "name": "Barcelona" },
-          { "@type": "Country", "name": "España" }
-        ],
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "contactType": "customer service",
-          "telephone": "+34672019390",
-          "email": "customproof.es@gmail.com",
-          "availableLanguage": ["es"],
-          "areaServed": "ES"
-        },
-        "makesOffer": [
-          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Stickers die-cut personalizados" }, "priceCurrency": "EUR" },
-          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Tazas personalizadas" }, "priceCurrency": "EUR" },
-          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Camisetas personalizadas" }, "priceCurrency": "EUR" }
-        ]
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://www.customproof.es/#faq",
-        "inLanguage": "es",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "¿Cómo hago un pedido en Custom Proof?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Elegís los productos y las opciones en el catálogo y los sumás al carrito. Con un toque el pedido viaja armado a nuestro WhatsApp. Te mandamos la vista previa del diseño antes de imprimir y, una vez aprobada, producimos y enviamos. No hace falta registrarse ni pagar online." }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Cuál es la cantidad mínima?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Desde 1 unidad. Todos los productos son hechos a pedido, así que no hay mínimos de compra." }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Cuánto tarda la producción y el envío?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Producimos en 24 a 48 horas y enviamos a toda España. El envío y la forma de pago se coordinan por WhatsApp." }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Hacen envíos gratis?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Sí: el envío a Barcelona es gratis en compras superiores a 25 €. Al resto de España se coordina el envío por WhatsApp." }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Puedo mandar mi propio diseño?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Sí. Nos mandás el archivo por WhatsApp en PNG, JPG, PDF o vector y te pasamos presupuesto y vista previa antes de imprimir." }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Los stickers resisten el agua?",
-            "acceptedAnswer": { "@type": "Answer", "text": "Sí. Los stickers son die-cut (cortados con la forma del diseño) y resistentes al agua, al sol y a los rayones." }
-          }
-        ]
-      }
-    ]
-  }
-  </script>
+  <!--PRERENDER:JSONLD-->
+  <!-- Lo escribe scripts/prerender.mjs en el build, con el catalogo real del Sheet.
+       Estatico a proposito: los crawlers de IA no ejecutan JS. -->
+  <!--/PRERENDER:JSONLD-->
 </head>
 <body>
-  <!-- Contenido para crawlers sin JS (GPTBot, ClaudeBot, PerplexityBot y compañía).
-       Espeja lo que ve el usuario; los navegadores con JS lo ignoran por completo. -->
+  <!-- Contenido para crawlers sin JS (GPTBot, ClaudeBot, PerplexityBot y compania).
+       Lo llena scripts/prerender.mjs con el catalogo real; los navegadores con JS lo ignoran. -->
   <noscript>
+  <!--PRERENDER:CONTENT-->
     <h1>Custom Proof · Stickers y productos personalizados en Barcelona</h1>
-    <p>
-      Custom Proof hace stickers die-cut y productos personalizados a pedido en Barcelona, con envío
-      a toda España. Los stickers se cortan con la forma del diseño y son resistentes al agua, al sol
-      y a los rayones. También hacemos tazas, camisetas y otros productos personalizados.
-    </p>
-    <h2>Cómo funciona</h2>
-    <ol>
-      <li>Elegís los productos y las opciones que quieras y los sumás al carrito.</li>
-      <li>Con un toque el pedido viaja a nuestro WhatsApp, ya armado.</li>
-      <li>Te mandamos la vista previa del diseño antes de imprimir.</li>
-      <li>Producimos en 24 a 48 horas y enviamos a toda España.</li>
-    </ol>
-    <h2>Condiciones</h2>
-    <ul>
-      <li>Desde 1 unidad: todo es hecho a pedido, sin mínimos de compra.</li>
-      <li>Producción en 24 a 48 horas.</li>
-      <li>Envío a toda España. Envío gratis a Barcelona en compras superiores a 25 €.</li>
-      <li>Sin registros ni pagos online: el pago y el envío se coordinan por WhatsApp.</li>
-      <li>Precios en euros (EUR).</li>
-      <li>¿Tenés tu propio diseño? Mandanos el archivo en PNG, JPG, PDF o vector y te pasamos presupuesto y vista previa.</li>
-    </ul>
-    <h2>Contacto</h2>
-    <ul>
-      <li>WhatsApp: <a href="https://wa.me/34672019390">+34 672 019 390</a></li>
-      <li>Email: <a href="mailto:customproof.es@gmail.com">customproof.es@gmail.com</a></li>
-    </ul>
+  <!--/PRERENDER:CONTENT-->
   </noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
