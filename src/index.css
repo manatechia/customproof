@@ -97,9 +97,23 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .catalog { padding-top: 64px; padding-bottom: 20px; scroll-margin-top: 80px; }
 .catalog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .section-title { font-weight: 700; font-size: 44px; margin: 0; letter-spacing: -.01em; }
+.catalog-tools { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
 .cats { display: flex; gap: 10px; flex-wrap: wrap; }
 .cat-btn { background: transparent; color: var(--muted); border: 2px solid var(--line-3); border-radius: 999px; padding: 9px 18px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; cursor: pointer; }
 .cat-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+/* Buscador: misma pastilla que los chips de categoría, con la lupa adentro */
+.search { display: flex; align-items: center; gap: 8px; border: 2px solid var(--line-3); border-radius: 999px; padding: 0 14px; height: 44px; width: 260px; color: var(--muted-3); }
+.search:focus-within { border-color: var(--ink); color: var(--ink); }
+.search-input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--ink); font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; }
+.search-input::placeholder { color: var(--muted-3); }
+.search-input:disabled { cursor: default; }
+/* La X nativa de type="search" no se puede tematizar: usamos la nuestra */
+.search-input::-webkit-search-cancel-button { display: none; }
+.search-clear { background: transparent; border: 0; color: var(--muted-3); font-size: 20px; line-height: 1; padding: 0 2px; cursor: pointer; }
+.search-clear:hover { color: var(--ink); }
+.catalog-empty { color: var(--muted); font-size: 17px; margin: 32px 0 0; }
+.link-btn { background: transparent; border: 0; padding: 0; font: inherit; color: var(--celeste-text); cursor: pointer; }
+.link-btn:hover { color: var(--yellow-text); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; margin-top: 32px; }
 /* Paginado del catálogo: mismo lenguaje que las flechas del carrusel */
 .pager { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 40px; }
@@ -201,6 +215,11 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .featured-arrows { display: none; }
   .catalog { padding-top: 44px; }
   .catalog-head { gap: 16px; }
+  /* En móvil el buscador va a todo el ancho, arriba de las categorías,
+     y los chips arrancan a la izquierda como el resto de la sección */
+  .catalog-tools { width: 100%; gap: 14px; justify-content: flex-start; }
+  .search { width: 100%; }
+  .catalog-empty { font-size: 15.5px; margin-top: 24px; }
 
   .pager { margin-top: 28px; gap: 8px; }
   .page-btn { min-width: 40px; height: 40px; padding: 0 10px; font-size: 14px; }

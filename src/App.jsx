@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { fetchCatalog } from './catalog.js'
-import { WhatsAppIcon, MailIcon, SmileyIcon } from './components/Icons.jsx'
+import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
 
 const PAGE_SIZE = 30
+
+/* Para buscar sin acentos ni mayúsculas: "cami" tiene que encontrar "CAMISETA" */
+const norm = (s) => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
 
 /* 1 … 4 5 6 … 12: siempre los extremos y una ventana alrededor de la actual */
 function pageList(total, current) {
@@ -26,6 +29,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
+  const [term, setTerm] = useState('')
   const [page, setPage] = useState(1)
   /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
   const [cart, setCart] = useState(() => {
@@ -62,7 +66,10 @@ export default function App() {
   const loading = catalog === null
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
-  const shown = products.filter((p) => cat === 'Todo' || p.cat === cat)
+  const query = norm(term)
+  const shown = products.filter(
+    (p) => (cat === 'Todo' || p.cat === cat) && (!query || norm(p.name).includes(query))
+  )
   const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE))
   /* Derivado y no guardado: si el filtro achica el catálogo, la página se acota sola */
   const current = Math.min(page, pages)
@@ -95,6 +102,12 @@ export default function App() {
 
   const pickCat = (c) => {
     setCat(c)
+    setPage(1)
+  }
+
+  /* El filtro achica el catálogo: cualquier búsqueda vuelve a la primera página */
+  const search = (v) => {
+    setTerm(v)
     setPage(1)
   }
 
@@ -265,19 +278,36 @@ export default function App() {
         <section id="productos" className="container catalog" ref={catalogTop}>
           <div className="catalog-head">
             <h2 className="section-title">El catálogo</h2>
-            <div className="cats">
-              {loading
-                ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
-                : cats.map((c) => (
-                    <button
-                      key={c}
-                      className={`cat-btn${c === cat ? ' active' : ''}`}
-                      aria-pressed={c === cat}
-                      onClick={() => pickCat(c)}
-                    >
-                      {c}
-                    </button>
-                  ))}
+            <div className="catalog-tools">
+              <div className="search">
+                <SearchIcon />
+                <input
+                  type="search"
+                  className="search-input"
+                  placeholder="Buscar por nombre…"
+                  aria-label="Buscar productos por nombre"
+                  value={term}
+                  onChange={(e) => search(e.target.value)}
+                  disabled={loading}
+                />
+                {term && (
+                  <button className="search-clear" aria-label="Borrar búsqueda" onClick={() => search('')}>×</button>
+                )}
+              </div>
+              <div className="cats">
+                {loading
+                  ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
+                  : cats.map((c) => (
+                      <button
+                        key={c}
+                        className={`cat-btn${c === cat ? ' active' : ''}`}
+                        aria-pressed={c === cat}
+                        onClick={() => pickCat(c)}
+                      >
+                        {c}
+                      </button>
+                    ))}
+              </div>
             </div>
           </div>
           <div className="grid">
@@ -318,6 +348,14 @@ export default function App() {
               </article>
             ))}
           </div>
+
+          {!loading && !shown.length && (
+            <p className="catalog-empty">
+              {query
+                ? <>No encontramos productos con «{term.trim()}». Probá con otro nombre o mirá <button className="link-btn" onClick={() => { search(''); pickCat('Todo') }}>todo el catálogo</button>.</>
+                : 'El catálogo no está disponible en este momento. Escribinos por WhatsApp y te pasamos los productos.'}
+            </p>
+          )}
 
           {!loading && pages > 1 && (
             <nav className="pager" aria-label="Paginación del catálogo">
