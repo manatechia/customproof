@@ -55,7 +55,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 
 /* Hero */
 .hero { padding-top: 72px; padding-bottom: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 48px; align-items: center; }
-.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--pink); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 7px 16px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .02em; }
+.hero-badge { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 3px 0; background: var(--pink); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 7px 16px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: .02em; }
+.hero-badge span { white-space: nowrap; }
+.hero-badge-sep { margin: 0 7px 0 9px; }
 .hero-title { font-weight: 700; font-size: 76px; line-height: .95; margin: 20px 0 0; letter-spacing: -.02em; text-wrap: balance; }
 .hero-title .celeste { color: var(--celeste-text); }
 .hero-title .yellow { color: var(--yellow-text); }

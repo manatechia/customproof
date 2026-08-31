@@ -186,7 +186,13 @@ export default function App() {
       <main>
         <section id="top" className="container hero">
           <div>
-            <div className="hero-badge">HECHO A PEDIDO EN BARCELONA · ENVÍOS A TODA ESPAÑA</div>
+            {/* El separador viaja con la frase que le sigue: asi el bullet nunca
+                queda colgando al final de una linea cuando la pastilla parte en dos */}
+            <div className="hero-badge">
+              <span>Hecho en Barcelona</span>
+              <span><span className="hero-badge-sep" aria-hidden="true">•</span>Envíos a toda España</span>
+              <span><span className="hero-badge-sep" aria-hidden="true">•</span>Pedidos personalizados por encargo</span>
+            </div>
             <h1 className="hero-title">
               Tus ideas,{' '}<br />
               <span className="celeste">pegadas</span> <span className="yellow">e impresas</span>.
