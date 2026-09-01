@@ -189,8 +189,8 @@ export default function App() {
       ship.needsAddress
         ? `Dirección: ${formatAddress({ ...datos, ciudad })}`
         : `Entrega: ${ship.entrega}`,
-      '',
-      'Te paso los diseños por acá 👇',
+      /* Lo de mandar los diseños es solo del pedido personalizado (botón "Mandá
+         tu diseño"): en un pedido del catálogo no hay ningún archivo que pasar */
     ].join('\n')
     if (win) win.location = waLink(msg)
     else window.open(waLink(msg), '_blank')
