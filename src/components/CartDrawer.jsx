@@ -210,10 +210,10 @@ export default function CartDrawer({
               <span className="total">{eur(total)}{ship.quote ? ' + envío' : ''}</span>
             </div>
             <p className="drawer-note">
-              Envío gratis a domicilio en Barcelona a partir de {FREE_FROM} €, {eur(BCN_COST)} por
-              debajo, y recogida gratis a coordinar. Fuera de Barcelona el costo del envío lo
-              pasamos por WhatsApp. El pago y los descuentos por cantidad también se coordinan por
-              ahí: no se cobra nada desde la web.
+              Envío gratis a domicilio en Barcelona a partir de {FREE_FROM}€ — Costo de envío por
+              Barcelona Centro {BCN_COST}€. Envíos fuera de Barcelona, se envían valores por
+              WhatsApp según destino. El pago y los descuentos por cantidad también se coordinan
+              por ahí.
             </p>
             <button className="checkout-btn" type="submit" disabled={sending || !cart.length}>
               {sending ? 'Abriendo WhatsApp…' : 'Finalizar por WhatsApp'}
