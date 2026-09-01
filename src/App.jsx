@@ -27,7 +27,7 @@ function pageList(total, current) {
 /* Datos de entrega que viajan con el pedido. zona: '' | 'bcn' | 'fuera' */
 const EMPTY_FORM = { nombre: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '' }
 
-const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ☆ '
+const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
