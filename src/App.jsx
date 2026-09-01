@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
+import { shippingFor, formatAddress } from './shipping.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
@@ -23,6 +24,9 @@ function pageList(total, current) {
   return out
 }
 
+/* Datos de entrega que viajan con el pedido. zona: '' | 'bcn' | 'fuera' */
+const EMPTY_FORM = { nombre: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '' }
+
 const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA EN COMPRAS SUPERIORES A 25€ ☆ '
 
 export default function App() {
@@ -35,6 +39,10 @@ export default function App() {
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cp-cart')) || [] } catch { return [] }
   })
+  /* También persistido: el que vuelve a comprar no reescribe su dirección */
+  const [form, setForm] = useState(() => {
+    try { return { ...EMPTY_FORM, ...JSON.parse(localStorage.getItem('cp-datos')) } } catch { return EMPTY_FORM }
+  })
   const [open, setOpen] = useState(false)
   const track = useRef(null)
   const catalogTop = useRef(null)
@@ -45,6 +53,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('cp-cart', JSON.stringify(cart))
   }, [cart])
+
+  useEffect(() => {
+    localStorage.setItem('cp-datos', JSON.stringify(form))
+  }, [form])
 
   useEffect(() => {
     let alive = true
@@ -77,7 +89,10 @@ export default function App() {
   /* Los primeros 5 destacados, en el orden del catálogo (columna `orden` o el de la hoja) */
   const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
-  const total = cart.reduce((a, c) => a + c.price * c.qty, 0)
+  const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0)
+  /* El envío depende de la zona y del subtotal: se recalcula en cada render */
+  const ship = shippingFor(form, subtotal)
+  const total = subtotal + ship.cost
 
   const syncEdges = () => {
     const el = track.current
@@ -135,9 +150,13 @@ export default function App() {
     })
   }
 
+  const field = (k, v) => setForm((prev) => ({ ...prev, [k]: v }))
+
   const checkout = async () => {
     if (!cart.length || sending) return
     setSending(true)
+    const ciudad = form.zona === 'bcn' ? 'Barcelona' : form.ciudad.trim()
+    const datos = { ...form, ciudad, entrega: ship.pickup ? 'recogida' : 'envio' }
     /* Abrimos la pestaña dentro del gesto del usuario para esquivar el bloqueador de popups
        y la navegamos cuando el pedido quedó registrado en la hoja de Ventas */
     const win = window.open('', '_blank')
@@ -146,7 +165,7 @@ export default function App() {
       const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: cart.map(({ id, opt, qty }) => ({ id, opt, qty })) }),
+        body: JSON.stringify({ items: cart.map(({ id, opt, qty }) => ({ id, opt, qty })), datos }),
       })
       if (res.ok) ({ ref } = await res.json())
     } catch (e) {
@@ -154,7 +173,25 @@ export default function App() {
     }
     setSending(false)
     const lines = cart.map((c) => `• ${c.qty}x ${c.name}${c.opt ? ` (${c.opt})` : ''} — ${eur(c.price * c.qty)}`)
-    const msg = `¡Hola Custom Proof! Quiero hacer este pedido${ref ? ` (${ref})` : ''}:\n\n${lines.join('\n')}\n\nTotal estimado: ${eur(total)}\n\nTe paso los diseños por acá 👇`
+    /* El mensaje llega con los datos ya cargados: nada que repreguntar por chat */
+    const msg = [
+      `¡Hola Custom Proof! Quiero hacer este pedido${ref ? ` (${ref})` : ''}:`,
+      '',
+      ...lines,
+      '',
+      `Subtotal: ${eur(subtotal)}`,
+      `${ship.label}: ${ship.value}`,
+      `Total estimado: ${eur(total)}${ship.quote ? ' + envío' : ''}`,
+      '',
+      `Nombre: ${form.nombre.trim()}`,
+      `Ciudad: ${ciudad}`,
+      /* Con envío la dirección ya dice todo; la recogida necesita su propia línea */
+      ship.needsAddress
+        ? `Dirección: ${formatAddress({ ...datos, ciudad })}`
+        : `Entrega: ${ship.entrega}`,
+      '',
+      'Te paso los diseños por acá 👇',
+    ].join('\n')
     if (win) win.location = waLink(msg)
     else window.open(waLink(msg), '_blank')
   }
@@ -476,9 +513,13 @@ export default function App() {
       <CartDrawer
         open={open}
         cart={cart}
+        form={form}
+        ship={ship}
+        subtotal={subtotal}
         total={total}
         onClose={() => setOpen(false)}
         onBump={bump}
+        onField={field}
         onCheckout={checkout}
         sending={sending}
       />

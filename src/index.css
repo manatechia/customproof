@@ -303,3 +303,30 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .checkout-btn { background: var(--wa); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 15px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
 .checkout-btn:hover { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--wa); }
 .checkout-btn:disabled { opacity: .6; cursor: wait; }
+
+/* Datos de entrega dentro del carrito: el pedido llega completo al WhatsApp */
+.drawer-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.fields { display: flex; flex-direction: column; gap: 12px; border-top: 2px dashed var(--line-2); padding-top: 16px; }
+.fields-title { font-weight: 600; font-size: 17px; margin: 0; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field > span { font-size: 13px; color: var(--muted-2); }
+.field-input { width: 100%; background: transparent; border: 2px solid var(--line-3); border-radius: 14px; padding: 11px 14px; color: var(--ink); font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; outline: 0; }
+.field-input::placeholder { color: var(--muted-3); }
+.field-input:focus { border-color: var(--ink); }
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; }
+.field-set { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.field-set legend { padding: 0; font-size: 13px; color: var(--muted-2); }
+.opt-row { display: flex; gap: 10px; }
+.opt-row .opt { flex: 1; }
+/* Misma pastilla que los chips del catálogo, con el radio nativo adentro */
+.opt { display: flex; align-items: center; gap: 9px; border: 2px solid var(--line-3); border-radius: 14px; padding: 11px 13px; cursor: pointer; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14.5px; }
+.opt.on { border-color: var(--ink); }
+.opt input { accent-color: var(--celeste); width: 17px; height: 17px; margin: 0; flex: none; cursor: pointer; }
+.opt-wide { align-items: flex-start; }
+.opt-wide b { display: block; font-weight: 600; font-size: 15px; }
+.opt-wide em { display: block; margin-top: 3px; font-style: normal; font-family: 'Work Sans', system-ui, sans-serif; font-size: 12.5px; line-height: 1.45; color: var(--muted-3); }
+.field-note { margin: 0; border-left: 3px solid var(--celeste); padding-left: 11px; font-size: 12.5px; line-height: 1.5; color: var(--muted-2); }
+.sum { display: flex; flex-direction: column; gap: 6px; }
+.sum-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted-2); }
+.sum-row span:last-child { color: var(--ink); text-align: right; }
