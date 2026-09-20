@@ -262,8 +262,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .grid { gap: 14px; }
   .grid .card { border-radius: 18px; }
   .grid .card-img { padding: 6px; }
-  /* En cards de ~165px la etiqueta le tapa media foto al sticker */
-  .grid .card-tag { display: none; }
+  /* En cards de ~165px la etiqueta pisa el sticker, asi que va chiquita y
+     bien pegada a la esquina. Si igual molesta, volvemos a display: none. */
+  .grid .card-tag { top: 7px; left: 7px; padding: 3px 9px; font-size: 10.5px; }
   .grid .card-body { padding: 12px 12px 14px; gap: 8px; }
   .grid .card-title-row { flex-direction: column; align-items: flex-start; gap: 2px; }
   .grid .card-name { font-size: 15.5px; }
