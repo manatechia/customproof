@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { shippingFor, formatAddress } from './shipping.js'
+import { discountFor, normalizeCode } from './discount.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
@@ -25,7 +26,11 @@ function pageList(total, current) {
 }
 
 /* Datos de entrega que viajan con el pedido. zona: '' | 'bcn' | 'fuera' */
-const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '' }
+const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '', codigo: '' }
+
+/* El descuento validado no se persiste con el resto del form: depende del email
+   y del momento, y uno aprobado hace tres días no tiene que resucitar al recargar */
+const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 
 const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
@@ -49,6 +54,8 @@ export default function App() {
   /* Hacia qué lado se puede scrollear el carrusel; sin overflow no hay flechas */
   const [edges, setEdges] = useState({ start: true, end: true })
   const [sending, setSending] = useState(false)
+  const [discount, setDiscount] = useState(NO_DISCOUNT)
+  const [checking, setChecking] = useState(false)
 
   useEffect(() => {
     localStorage.setItem('cp-cart', JSON.stringify(cart))
@@ -57,6 +64,13 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('cp-datos', JSON.stringify(form))
   }, [form])
+
+  /* La validez del código depende del email: si cambia cualquiera de los dos
+     hay que volver a tocar Aplicar, así el total nunca muestra un descuento
+     que ya no corre */
+  useEffect(() => {
+    setDiscount(NO_DISCOUNT)
+  }, [form.codigo, form.email])
 
   useEffect(() => {
     let alive = true
@@ -90,9 +104,10 @@ export default function App() {
   const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0)
-  /* El envío depende de la zona y del subtotal: se recalcula en cada render */
-  const ship = shippingFor(form, subtotal)
-  const total = subtotal + ship.cost
+  const disc = discountFor(subtotal, discount.pct)
+  /* El envío depende de la zona y del subtotal ya descontado: se recalcula en cada render */
+  const ship = shippingFor(form, disc.net)
+  const total = disc.net + ship.cost
 
   const syncEdges = () => {
     const el = track.current
@@ -152,27 +167,66 @@ export default function App() {
 
   const field = (k, v) => setForm((prev) => ({ ...prev, [k]: v }))
 
+  /* Solo para mostrar el descuento en el carrito: el que vale es el que
+     recalcula /api/order con el porcentaje de la hoja */
+  const applyCode = async () => {
+    const code = normalizeCode(form.codigo)
+    if (!code || checking) return
+    setChecking(true)
+    try {
+      const res = await fetch('/api/discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, email: form.email.trim() }),
+      })
+      const data = await res.json()
+      setDiscount(
+        data.ok
+          ? { pct: data.pct, code: data.code, ok: true, msg: `Listo: ${data.pct}% off en los productos.` }
+          : { ...NO_DISCOUNT, msg: data.error || 'No pudimos aplicar ese código.' }
+      )
+    } catch {
+      setDiscount({ ...NO_DISCOUNT, msg: 'No pudimos comprobar el código. Probá de nuevo.' })
+    }
+    setChecking(false)
+  }
+
   const checkout = async () => {
     if (!cart.length || sending) return
     setSending(true)
     const ciudad = form.zona === 'bcn' ? 'Barcelona' : form.ciudad.trim()
     const email = form.email.trim()
-    const datos = { ...form, ciudad, email, entrega: ship.pickup ? 'recogida' : 'envio' }
+    const datos = {
+      ...form, ciudad, email,
+      entrega: ship.pickup ? 'recogida' : 'envio',
+      codigo: normalizeCode(form.codigo),
+    }
     /* Abrimos la pestaña dentro del gesto del usuario para esquivar el bloqueador de popups
        y la navegamos cuando el pedido quedó registrado en la hoja de Ventas */
     const win = window.open('', '_blank')
     let ref = ''
+    /* Si /api/order no contesta el mensaje cae al cálculo local */
+    let pct = discount.pct
+    let codigo = discount.code
+    let verificado = true
     try {
       const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: cart.map(({ id, opt, qty }) => ({ id, opt, qty })), datos }),
       })
-      if (res.ok) ({ ref } = await res.json())
+      if (res.ok) ({ ref, pct, codigo, verificado } = await res.json())
     } catch (e) {
       console.warn('No se pudo registrar el pedido:', e) /* el pedido sigue por WhatsApp igual */
     }
     setSending(false)
+
+    /* El servidor pudo rechazar el código o no haber podido comprobarlo: el
+       mensaje tiene que decir lo que realmente se aplicó, no lo que mostraba
+       el carrito */
+    const applied = discountFor(subtotal, pct)
+    const shipOut = shippingFor(form, applied.net)
+    const totalOut = applied.net + shipOut.cost
     const lines = cart.map((c) => `• ${c.qty}x ${c.name}${c.opt ? ` (${c.opt})` : ''} — ${eur(c.price * c.qty)}`)
     /* El mensaje llega con los datos ya cargados: nada que repreguntar por chat */
     const msg = [
@@ -181,17 +235,20 @@ export default function App() {
       ...lines,
       '',
       `Subtotal: ${eur(subtotal)}`,
-      `${ship.label}: ${ship.value}`,
-      `Total estimado: ${eur(total)}${ship.quote ? ' + envío' : ''}`,
+      applied.pct ? `Descuento ${codigo} (${applied.pct}%): ${applied.value}` : null,
+      `${shipOut.label}: ${shipOut.value}`,
+      `Total estimado: ${eur(totalOut)}${shipOut.quote ? ' + envío' : ''}`,
       '',
       `Nombre: ${form.nombre.trim()}`,
       /* Sin email solo puede ser una recogida en mano: ahí no se lo pedimos */
       email ? `Email: ${email}` : null,
       `Ciudad: ${ciudad}`,
       /* Con envío la dirección ya dice todo; la recogida necesita su propia línea */
-      ship.needsAddress
+      shipOut.needsAddress
         ? `Dirección: ${formatAddress({ ...datos, ciudad })}`
-        : `Entrega: ${ship.entrega}`,
+        : `Entrega: ${shipOut.entrega}`,
+      /* Si la hoja no respondió el código igual tiene que llegarle a Noelia */
+      !verificado && codigo ? `\nCódigo a verificar a mano: ${codigo}` : null,
       /* Lo de mandar los diseños es solo del pedido personalizado (botón "Mandá
          tu diseño"): en un pedido del catálogo no hay ningún archivo que pasar */
       /* Las líneas nulas se caen; las vacías son saltos de línea a propósito */
@@ -519,12 +576,16 @@ export default function App() {
         cart={cart}
         form={form}
         ship={ship}
+        disc={disc}
+        discount={discount}
+        checking={checking}
         subtotal={subtotal}
         total={total}
         onClose={() => setOpen(false)}
         onBump={bump}
         onField={field}
         onCheckout={checkout}
+        onApplyCode={applyCode}
         sending={sending}
       />
     </div>

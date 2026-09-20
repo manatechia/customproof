@@ -1,13 +1,19 @@
 import { eur } from '../data.js'
 import { PICKUP, FREE_FROM, BCN_COST } from '../shipping.js'
+import { normalizeCode } from '../discount.js'
 
 export default function CartDrawer({
-  open, cart, form, ship, subtotal, total,
-  onClose, onBump, onField, onCheckout, sending,
+  open, cart, form, ship, disc, discount, checking, subtotal, total,
+  onClose, onBump, onField, onCheckout, onApplyCode, sending,
 }) {
   const bcn = form.zona === 'bcn'
   const fuera = form.zona === 'fuera'
   const recogida = bcn && form.entrega === 'recogida'
+  const codigo = normalizeCode(form.codigo)
+  /* El descuento puede bajar el subtotal debajo del umbral y hacer que el total
+     SUBA: hay que avisarlo o parece un error de la web */
+  const pierdeEnvioGratis =
+    disc.pct > 0 && bcn && !ship.pickup && subtotal >= FREE_FROM && disc.net < FREE_FROM
 
   return (
     <>
@@ -131,8 +137,10 @@ export default function CartDrawer({
                       />
                       <span>
                         <b>Envío a domicilio</b>
+                        {/* Contra el neto y no el subtotal: con descuento el
+                            pedido puede caer debajo del umbral */}
                         <em>
-                          {subtotal >= FREE_FROM
+                          {disc.net >= FREE_FROM
                             ? `Gratis: tu pedido supera los ${FREE_FROM} €`
                             : `${eur(BCN_COST)} · gratis a partir de ${FREE_FROM} €`}
                         </em>
@@ -204,6 +212,53 @@ export default function CartDrawer({
                     </div>
                   </>
                 )}
+
+                {/* Botón y no validación al salir del campo: el blur dispara un
+                    pedido en cada tabulación y deja ambiguo si se aplicó o no */}
+                <label className="field">
+                  <span>¿Tenés un código de descuento?</span>
+                  <div className="code-row">
+                    <input
+                      className="field-input"
+                      value={form.codigo}
+                      onChange={(e) => onField('codigo', e.target.value)}
+                      placeholder="baumfest10"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      maxLength={32}
+                    />
+                    {/* type="button" o el botón manda el form y abre WhatsApp */}
+                    <button
+                      type="button"
+                      className="code-btn"
+                      disabled={checking || !codigo}
+                      onClick={onApplyCode}
+                    >
+                      {checking ? '…' : 'Aplicar'}
+                    </button>
+                  </div>
+                </label>
+
+                {discount.msg ? (
+                  <p className={`code-msg${discount.ok ? ' ok' : ' err'}`}>{discount.msg}</p>
+                ) : (
+                  !!codigo && <p className="code-msg">Tocá «Aplicar» para verlo en el total.</p>
+                )}
+
+                {recogida && !!codigo && !form.email.trim() && (
+                  <p className="field-note">
+                    Sin email no podemos comprobar que el código no se haya usado antes: lo
+                    revisamos por WhatsApp.
+                  </p>
+                )}
+
+                {pierdeEnvioGratis && (
+                  <p className="field-note">
+                    Con el descuento el pedido baja de {FREE_FROM} €, así que el envío vuelve a
+                    costar {eur(BCN_COST)}. Sumá algo más y te sigue saliendo gratis.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -215,6 +270,12 @@ export default function CartDrawer({
                   <span>Subtotal</span>
                   <span>{eur(subtotal)}</span>
                 </div>
+                {disc.pct > 0 && (
+                  <div className="sum-row sum-row-off">
+                    <span>{disc.label}</span>
+                    <span>{disc.value}</span>
+                  </div>
+                )}
                 <div className="sum-row">
                   <span>{ship.label}</span>
                   <span>{ship.value}</span>

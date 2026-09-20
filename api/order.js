@@ -1,6 +1,8 @@
 import { fetchCatalogFromSheet } from '../lib/catalog.js'
-import { appendVentaRow } from '../lib/sheets.js'
+import { appendVentaRow, appendCanjeRow } from '../lib/sheets.js'
+import { validateCode } from '../lib/discounts.js'
 import { shippingFor, formatAddress, ZONAS, PICKUP } from '../src/shipping.js'
+import { discountFor, normalizeCode } from '../src/discount.js'
 
 const bad = (msg, status = 400) => Response.json({ error: msg }, { status })
 
@@ -59,18 +61,41 @@ export async function POST(request) {
     subtotal += o.p * qty
   }
 
-  const ship = shippingFor({ zona, entrega }, subtotal)
+  /* El código se revalida siempre acá: /api/discount es solo feedback del carrito */
+  let codigo = normalizeCode(d.codigo)
+  let pct = 0
+  let verificado = true
+  if (codigo) {
+    try {
+      const r = await validateCode(codigo, email)
+      if (r.ok) pct = r.pct
+      /* Inexistente, apagado, caducado o ya usado: el pedido sigue sin descuento */
+      else codigo = ''
+    } catch (e) {
+      /* Que la hoja no responda no bloquea el pedido, igual que el append: sale
+         sin descuento y el código viaja a WhatsApp para revisarlo a mano */
+      console.error('No se pudo validar el código de descuento:', e)
+      verificado = false
+    }
+  }
+
+  const disc = discountFor(subtotal, pct)
+  /* El envío gratis se mide contra el subtotal ya descontado */
+  const ship = shippingFor({ zona, entrega }, disc.net)
   if (ship.needsAddress && (!calle || !/^\d{5}$/.test(cp))) return bad('Falta la dirección de envío')
   const direccion = ship.needsAddress
     ? formatAddress({ calle, piso, cp, ciudad })
     : `Recogida a coordinar (${PICKUP})`
-  const total = subtotal + ship.cost
+  const total = disc.net + ship.cost
 
   const ref = 'CP-' + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 36).toString(36).toUpperCase()
   const fecha = new Date().toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
 
+  /* Los importes van con coma, como los espera la hoja en locale ES */
+  const conComa = (n) => n.toFixed(2).replace('.', ',')
+
   /* Cabeceras de Ventas:
-     Id | fecha | nombre cliente | telefono cliente | email cliente | direccion cliente | items | total | payment_status | stripe_payment_id */
+     Id | fecha | nombre cliente | telefono cliente | email cliente | direccion cliente | items | total | payment_status | stripe_payment_id | codigo descuento | descuento */
   try {
     await appendVentaRow([
       ref,
@@ -79,14 +104,28 @@ export async function POST(request) {
       '', email,
       direccion,
       `${lines.join(' | ')} || ${ship.entrega}`,
-      total.toFixed(2).replace('.', ','),
+      conComa(total),
       'a coordinar por WhatsApp',
       '',
+      codigo,
+      pct ? conComa(disc.amount) : '',
     ])
   } catch (e) {
     /* El registro no debe bloquear el pedido: el cliente sigue a WhatsApp igual */
     console.error('No se pudo registrar el pedido en Ventas:', e)
   }
 
-  return Response.json({ ref })
+  /* El canje va en su propia hoja: borrar la fila devuelve el código. Después
+     de Ventas a propósito: si algo revienta preferimos la venta sin el canje
+     antes que un canje sin venta.
+     Cabeceras de Canjes: fecha | codigo | email | pedido | nombre | importe */
+  if (pct > 0) {
+    try {
+      await appendCanjeRow([fecha, codigo, email, ref, nombre, conComa(disc.amount)])
+    } catch (e) {
+      console.error('No se pudo registrar el canje:', e)
+    }
+  }
+
+  return Response.json({ ref, codigo, pct, verificado })
 }

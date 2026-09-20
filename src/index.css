@@ -328,6 +328,18 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .opt-wide b { display: block; font-weight: 600; font-size: 15px; }
 .opt-wide em { display: block; margin-top: 3px; font-style: normal; font-family: 'Work Sans', system-ui, sans-serif; font-size: 12.5px; line-height: 1.45; color: var(--muted-3); }
 .field-note { margin: 0; border-left: 3px solid var(--celeste); padding-left: 11px; font-size: 12.5px; line-height: 1.5; color: var(--muted-2); }
+/* Código de descuento: el botón repite el lenguaje de .cat-btn, con el radio
+   de .field-input para que quede a ras del campo */
+.code-row { display: flex; gap: 8px; }
+.code-row .field-input { flex: 1; min-width: 0; text-transform: lowercase; }
+.code-btn { flex: none; background: transparent; color: var(--ink); border: 2px solid var(--line-3); border-radius: 14px; padding: 0 16px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14.5px; cursor: pointer; }
+.code-btn:hover:not(:disabled) { border-color: var(--ink); background: var(--panel); }
+.code-btn:disabled { opacity: .45; cursor: default; }
+.code-msg { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted-3); }
+.code-msg.ok { color: var(--celeste-text); }
+.code-msg.err { color: var(--pink); }
+
 .sum { display: flex; flex-direction: column; gap: 6px; }
 .sum-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted-2); }
 .sum-row span:last-child { color: var(--ink); text-align: right; }
+.sum-row-off span:last-child { color: var(--celeste-text); }
