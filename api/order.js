@@ -30,6 +30,10 @@ export async function POST(request) {
   const entrega = zona === 'bcn' && d.entrega === 'recogida' ? 'recogida' : 'envio'
   const nombre = clean(d.nombre, 80)
   if (!nombre) return bad('Falta el nombre')
+  /* La recogida en mano puede ir sin email; el envío no */
+  const email = clean(d.email, 120).toLowerCase()
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return bad('El email no es válido')
+  if (!email && entrega !== 'recogida') return bad('Falta el email')
   const ciudad = zona === 'bcn' ? 'Barcelona' : clean(d.ciudad, 60)
   if (!ciudad) return bad('Falta la ciudad')
   const calle = clean(d.calle, 120)
@@ -72,7 +76,7 @@ export async function POST(request) {
       ref,
       fecha,
       nombre,
-      '', '',
+      '', email,
       direccion,
       `${lines.join(' | ')} || ${ship.entrega}`,
       total.toFixed(2).replace('.', ','),

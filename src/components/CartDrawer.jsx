@@ -62,6 +62,22 @@ export default function CartDrawer({
                   />
                 </label>
 
+                {/* La recogida en mano es el caso informal: ahí el email no se exige.
+                    type="email" igual valida el formato del que lo deja igual */}
+                <label className="field">
+                  <span>Email{recogida ? ' (opcional)' : ''}</span>
+                  <input
+                    className="field-input"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => onField('email', e.target.value)}
+                    placeholder="tumail@ejemplo.com"
+                    autoComplete="email"
+                    maxLength={120}
+                    required={!recogida}
+                  />
+                </label>
+
                 <fieldset className="field-set">
                   <legend>¿Desde dónde nos escribís?</legend>
                   <div className="opt-row">

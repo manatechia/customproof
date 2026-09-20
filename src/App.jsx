@@ -25,7 +25,7 @@ function pageList(total, current) {
 }
 
 /* Datos de entrega que viajan con el pedido. zona: '' | 'bcn' | 'fuera' */
-const EMPTY_FORM = { nombre: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '' }
+const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envio', calle: '', piso: '', cp: '' }
 
 const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
@@ -156,7 +156,8 @@ export default function App() {
     if (!cart.length || sending) return
     setSending(true)
     const ciudad = form.zona === 'bcn' ? 'Barcelona' : form.ciudad.trim()
-    const datos = { ...form, ciudad, entrega: ship.pickup ? 'recogida' : 'envio' }
+    const email = form.email.trim()
+    const datos = { ...form, ciudad, email, entrega: ship.pickup ? 'recogida' : 'envio' }
     /* Abrimos la pestaña dentro del gesto del usuario para esquivar el bloqueador de popups
        y la navegamos cuando el pedido quedó registrado en la hoja de Ventas */
     const win = window.open('', '_blank')
@@ -184,6 +185,8 @@ export default function App() {
       `Total estimado: ${eur(total)}${ship.quote ? ' + envío' : ''}`,
       '',
       `Nombre: ${form.nombre.trim()}`,
+      /* Sin email solo puede ser una recogida en mano: ahí no se lo pedimos */
+      email ? `Email: ${email}` : null,
       `Ciudad: ${ciudad}`,
       /* Con envío la dirección ya dice todo; la recogida necesita su propia línea */
       ship.needsAddress
@@ -191,7 +194,8 @@ export default function App() {
         : `Entrega: ${ship.entrega}`,
       /* Lo de mandar los diseños es solo del pedido personalizado (botón "Mandá
          tu diseño"): en un pedido del catálogo no hay ningún archivo que pasar */
-    ].join('\n')
+      /* Las líneas nulas se caen; las vacías son saltos de línea a propósito */
+    ].filter((l) => l !== null).join('\n')
     if (win) win.location = waLink(msg)
     else window.open(waLink(msg), '_blank')
   }
