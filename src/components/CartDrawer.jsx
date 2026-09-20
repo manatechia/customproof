@@ -222,7 +222,7 @@ export default function CartDrawer({
                       className="field-input"
                       value={form.codigo}
                       onChange={(e) => onField('codigo', e.target.value)}
-                      placeholder="baumfest10"
+                      placeholder="customproof"
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck={false}
