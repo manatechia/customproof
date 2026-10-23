@@ -163,6 +163,12 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .card-actions { display: flex; gap: 10px; margin-top: auto; padding-top: 6px; }
 .add-btn { flex: 1; background: var(--celeste); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 11px 20px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; }
 .add-btn:hover { background: var(--yellow); }
+.add-btn:disabled { background: transparent; color: var(--muted-3); border-color: var(--line-3); border-style: dashed; cursor: default; }
+/* Talles / opciones: pastillas chicas; la elegida en negro como la categoría activa */
+.opt-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+.opt-btn { min-width: 42px; background: transparent; color: var(--ink); border: 2px solid var(--line-3); border-radius: 999px; padding: 5px 11px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s; }
+.opt-btn:hover { border-color: var(--ink); }
+.opt-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
 /* Skeletons de carga del catálogo */
 @keyframes cppulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
@@ -302,6 +308,11 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .grid .card-price { font-size: 16px; }
   .grid .card-desc { font-size: 12.5px; }
   .grid .card-actions { padding-top: 2px; }
+  .grid .opt-picker { gap: 4px; }
+  .grid .opt-btn { min-width: 0; padding: 4px 8px; font-size: 12.5px; }
+  /* Los talles en una fila pareja: con flex el 2XL caía solo en otra línea */
+  .grid .opt-picker.sizes { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; }
+  .grid .opt-picker.sizes .opt-btn { padding: 4px 0; font-size: 11.5px; border-width: 1.5px; }
   .grid .add-btn { padding: 9px 10px; font-size: 14px; }
   .grid .skel-btn { height: 38px; }
 }

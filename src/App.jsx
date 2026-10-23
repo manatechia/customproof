@@ -35,6 +35,10 @@ const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 /* Paleta de la marca para los puntos de color de las categorías */
 const DOTS = ['var(--yellow)', 'var(--celeste)', 'var(--pink)']
 
+/* Opciones que son talles de ropa (S, M, XL, 2XL…): cambian el texto del botón */
+const SIZE_RE = /^(\d?X{0,3}[SML]|\d?XS)$/i
+const isSizes = (opts) => opts.every((o) => SIZE_RE.test(o.v))
+
 /* Black Week: hasta el 15/11 inclusive (hora de Barcelona) el marquee pasa a blanco y negro */
 const BLACK_WEEK = Date.now() < Date.parse('2026-11-16T00:00:00+01:00')
 
@@ -50,6 +54,8 @@ export default function App() {
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
   const [sub, setSub] = useState('') /* '' = todas las subcategorías */
+  /* Opción elegida en cada card con más de una (talle, tamaño…), por id de producto */
+  const [picked, setPicked] = useState({})
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(1)
   /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
@@ -184,14 +190,57 @@ export default function App() {
     catalogTop.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  /* Con una sola opción no hay nada que elegir; con varias, la que tocó el cliente */
+  const optFor = (p) => (p.opts.length > 1 ? p.opts.find((o) => o.v === picked[p.id]) : p.opts[0])
+
+  /* Precio de la card: el de la opción elegida o, si todavía no eligió y los
+     precios varían (un 2XL más caro), "desde" el más barato */
+  const priceOf = (p) => {
+    const o = optFor(p)
+    if (o) return eur(o.p)
+    const min = Math.min(...p.opts.map((x) => x.p))
+    return p.opts.every((x) => x.p === min) ? eur(min) : `desde ${eur(min)}`
+  }
+
   const add = (p) => {
-    const opt = p.opts[0]
+    const opt = optFor(p)
+    if (!opt) return
     setCart((prev) => {
       const i = prev.findIndex((c) => c.id === p.id && c.opt === opt.v)
       if (i >= 0) return prev.map((c, j) => (j === i ? { ...c, qty: c.qty + 1 } : c))
       return [...prev, { id: p.id, name: p.name, cat: p.cat, opt: opt.v, price: opt.p, qty: 1, tint: p.tint }]
     })
     setOpen(true)
+  }
+
+  /* Selector de opciones + botón, compartido por el Top y el catálogo. Sin
+     elegir, el botón pide el talle: así nadie se lleva una S por no mirar */
+  const buyRow = (p) => {
+    const opt = optFor(p)
+    const sizes = isSizes(p.opts)
+    return (
+      <>
+        {p.opts.length > 1 && (
+          <div className={`opt-picker${sizes ? ' sizes' : ''}`} role="group" aria-label={`${sizes ? 'Talle' : 'Opción'} de ${p.name}`}>
+            {p.opts.map((o) => (
+              <button
+                key={o.v}
+                className={`opt-btn${o.v === opt?.v ? ' active' : ''}`}
+                aria-pressed={o.v === opt?.v}
+                onClick={() => setPicked((prev) => ({ ...prev, [p.id]: o.v }))}
+              >
+                {o.v}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="card-actions">
+          <button className="add-btn" disabled={!opt} onClick={() => add(p)}>
+            {opt ? 'Agregar' : sizes ? 'Elegí tu talle' : 'Elegí una opción'}
+          </button>
+        </div>
+      </>
+    )
   }
 
   const bump = (i, d) => {
@@ -392,11 +441,9 @@ export default function App() {
                     <div className="card-body">
                       <div className="card-title-row">
                         <h3 className="card-name">{p.name}</h3>
-                        <span className="card-price">{eur(p.opts[0].p)}</span>
+                        <span className="card-price">{priceOf(p)}</span>
                       </div>
-                      <div className="card-actions">
-                        <button className="add-btn" onClick={() => add(p)}>Agregar</button>
-                      </div>
+                      {buyRow(p)}
                     </div>
                   </article>
                 ))}
@@ -494,12 +541,10 @@ export default function App() {
                 <div className="card-body">
                   <div className="card-title-row">
                     <h3 className="card-name">{p.name}</h3>
-                    <span className="card-price">{eur(p.opts[0].p)}</span>
+                    <span className="card-price">{priceOf(p)}</span>
                   </div>
                   <p className="card-desc">{p.desc}</p>
-                  <div className="card-actions">
-                    <button className="add-btn" onClick={() => add(p)}>Agregar</button>
-                  </div>
+                  {buyRow(p)}
                 </div>
               </article>
             ))}
