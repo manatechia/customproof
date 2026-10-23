@@ -164,12 +164,6 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .card-actions { display: flex; gap: 10px; margin-top: auto; padding-top: 6px; }
 .add-btn { flex: 1; background: var(--celeste); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 11px 20px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; }
 .add-btn:hover { background: var(--yellow); }
-.add-btn:disabled { background: transparent; color: var(--muted-3); border-color: var(--line-3); border-style: dashed; cursor: default; }
-/* Talles / opciones: pastillas chicas; la elegida en negro como la categoría activa */
-.opt-picker { display: flex; flex-wrap: wrap; gap: 6px; }
-.opt-btn { min-width: 42px; background: transparent; color: var(--ink); border: 2px solid var(--line-3); border-radius: 999px; padding: 5px 11px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s; }
-.opt-btn:hover { border-color: var(--ink); }
-.opt-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
 /* Skeletons de carga del catálogo */
 @keyframes cppulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
@@ -309,11 +303,6 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .grid .card-price { font-size: 16px; }
   .grid .card-desc { font-size: 12.5px; }
   .grid .card-actions { padding-top: 2px; }
-  .grid .opt-picker { gap: 4px; }
-  .grid .opt-btn { min-width: 0; padding: 4px 8px; font-size: 12.5px; }
-  /* Los talles en una fila pareja: con flex el 2XL caía solo en otra línea */
-  .grid .opt-picker.sizes { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 3px; }
-  .grid .opt-picker.sizes .opt-btn { padding: 4px 0; font-size: 11.5px; border-width: 1.5px; }
   .grid .add-btn { padding: 9px 10px; font-size: 14px; }
   .grid .skel-btn { height: 38px; }
 }
@@ -333,10 +322,19 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .cart-empty p { font-size: 14.5px; line-height: 1.55; margin: 8px 0 0; }
 .cart-item { display: flex; gap: 14px; border: 2px solid var(--line-5); border-radius: 18px; padding: 14px; }
 .cart-swatch { width: 56px; height: 56px; border-radius: 12px; flex: none; }
-.cart-item-body { flex: 1; min-width: 0; }
 .cart-img { object-fit: contain; display: block; }
+.cart-item-body { flex: 1; min-width: 0; }
 .cart-item-name { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; }
 .cart-item-opt { font-size: 13px; color: var(--muted-5); margin-top: 2px; }
+/* Talle de la línea: se elige acá y no en la card. Sin elegir, la etiqueta
+   avisa en rosa y el botón de finalizar queda bloqueado */
+.cart-opts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.cart-opts-label { color: var(--muted-3); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+.cart-opts-label.missing { color: var(--pink); }
+.cart-opts-list { display: flex; gap: 5px; flex-wrap: wrap; }
+.opt-btn { min-width: 34px; background: transparent; color: var(--ink); border: 2px solid var(--line-3); border-radius: 9px; padding: 4px 8px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 13px; cursor: pointer; transition: border-color .15s; }
+.opt-btn:hover { border-color: var(--ink); }
+.opt-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .cart-item-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
 .qty-btn { width: 28px; height: 28px; border-radius: 999px; background: var(--bg); color: var(--ink); border: 2px solid var(--line-3); cursor: pointer; font-size: 15px; }
 .cart-qty { font-family: 'Fredoka', sans-serif; font-size: 15px; min-width: 16px; text-align: center; }
@@ -347,7 +345,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .drawer-note { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted-3); }
 .checkout-btn { background: var(--wa); color: #000; border: 2px solid var(--ink); border-radius: 999px; padding: 15px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); }
 .checkout-btn:hover { background: var(--bg); color: var(--ink); box-shadow: 3px 3px 0 var(--wa); }
-.checkout-btn:disabled { opacity: .6; cursor: wait; }
+.checkout-btn:disabled { opacity: .6; cursor: not-allowed; }
 
 /* Datos de entrega dentro del carrito: el pedido llega completo al WhatsApp */
 .drawer-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }

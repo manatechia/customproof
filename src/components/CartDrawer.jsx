@@ -4,7 +4,7 @@ import { normalizeCode, PACK } from '../discount.js'
 
 export default function CartDrawer({
   open, cart, form, ship, disc, pack, discount, checking, subtotal, total,
-  onClose, onBump, onField, onCheckout, onApplyCode, sending,
+  onClose, onBump, onPickOpt, onField, onCheckout, onApplyCode, sending, sinTalle,
 }) {
   const bcn = form.zona === 'bcn'
   const fuera = form.zona === 'fuera'
@@ -41,7 +41,28 @@ export default function CartDrawer({
                     : <div className="cart-swatch" style={{ background: c.tint }} />}
                   <div className="cart-item-body">
                     <div className="cart-item-name">{c.name}</div>
-                    {c.opt && <div className="cart-item-opt">{c.opt}</div>}
+                    {c.opts.length > 0 ? (
+                      <div className="cart-opts">
+                        <span className={`cart-opts-label${c.opt ? '' : ' missing'}`}>
+                          {c.opt ? (c.sizes ? 'Talle' : 'Opción') : c.sizes ? 'Elegí tu talle' : 'Elegí una opción'}
+                        </span>
+                        <div className="cart-opts-list" role="group" aria-label={`${c.sizes ? 'Talle' : 'Opción'} de ${c.name}`}>
+                          {c.opts.map((o) => (
+                            <button
+                              type="button"
+                              key={o.v}
+                              className={`opt-btn${o.v === c.opt ? ' active' : ''}`}
+                              aria-pressed={o.v === c.opt}
+                              onClick={() => onPickOpt(i, o.v)}
+                            >
+                              {o.v}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      c.opt && <div className="cart-item-opt">{c.opt}</div>
+                    )}
                     <div className="cart-item-row">
                       <button type="button" className="qty-btn" onClick={() => onBump(i, -1)}>−</button>
                       <span className="cart-qty">{c.qty}</span>
@@ -307,7 +328,8 @@ export default function CartDrawer({
               WhatsApp según destino. El pago y los descuentos por cantidad también se coordinan
               por ahí.
             </p>
-            <button className="checkout-btn" type="submit" disabled={sending || !cart.length}>
+            {sinTalle && <p className="field-note">Elegí el talle de cada prenda para poder finalizar el pedido.</p>}
+            <button className="checkout-btn" type="submit" disabled={sending || !cart.length || sinTalle}>
               {sending ? 'Abriendo WhatsApp…' : 'Finalizar por WhatsApp'}
             </button>
           </div>

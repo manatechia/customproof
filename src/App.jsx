@@ -37,7 +37,7 @@ const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 const CAT_COLORS = { stickers: 'var(--yellow)', ropa: 'var(--pink)', tazas: 'var(--celeste)', otros: 'var(--muted-3)' }
 const DOTS = ['var(--yellow)', 'var(--celeste)', 'var(--pink)']
 
-/* Opciones que son talles de ropa (S, M, XL, 2XL…): cambian el texto del botón */
+/* Opciones que son talles de ropa (S, M, XL, 2XL…): el carrito dice "Talle" */
 const SIZE_RE = /^(\d?X{0,3}[SML]|\d?XS)$/i
 const isSizes = (opts) => opts.every((o) => SIZE_RE.test(o.v))
 
@@ -56,8 +56,6 @@ export default function App() {
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
   const [sub, setSub] = useState('') /* '' = todas las subcategorías */
-  /* Opción elegida en cada card con más de una (talle, tamaño…), por id de producto */
-  const [picked, setPicked] = useState({})
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(1)
   /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
@@ -139,6 +137,8 @@ export default function App() {
   /* Los primeros 5 destacados, en el orden del catálogo (columna `orden` o el de la hoja) */
   const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
+  /* Alguna línea con talles todavía sin elegir: el pedido no puede salir así */
+  const sinTalle = cart.some((c) => !c.opt && (products.find((p) => p.id === c.id)?.opts.length ?? 0) > 1)
   const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0)
   /* La categoría sale del catálogo: los carritos guardados de antes no la traen */
   const pack = packFor(cart.map((c) => ({ ...c, cat: products.find((p) => p.id === c.id)?.cat ?? c.cat })))
@@ -193,20 +193,17 @@ export default function App() {
   }
 
   /* Con una sola opción no hay nada que elegir; con varias, la que tocó el cliente */
-  const optFor = (p) => (p.opts.length > 1 ? p.opts.find((o) => o.v === picked[p.id]) : p.opts[0])
-
-  /* Precio de la card: el de la opción elegida o, si todavía no eligió y los
-     precios varían (un 2XL más caro), "desde" el más barato */
+  /* Precio de la card: si las opciones cuestan distinto (un 2XL más caro),
+     "desde" el más barato; el talle se elige después, en el carrito */
   const priceOf = (p) => {
-    const o = optFor(p)
-    if (o) return eur(o.p)
     const min = Math.min(...p.opts.map((x) => x.p))
     return p.opts.every((x) => x.p === min) ? eur(min) : `desde ${eur(min)}`
   }
 
+  /* Con varias opciones (talles) la línea entra sin elegir (opt '') y se elige
+     en el carrito: no se puede finalizar hasta que todas tengan una */
   const add = (p) => {
-    const opt = optFor(p)
-    if (!opt) return
+    const opt = p.opts.length > 1 ? { v: '', p: Math.min(...p.opts.map((x) => x.p)) } : p.opts[0]
     setCart((prev) => {
       const i = prev.findIndex((c) => c.id === p.id && c.opt === opt.v)
       if (i >= 0) return prev.map((c, j) => (j === i ? { ...c, qty: c.qty + 1 } : c))
@@ -215,34 +212,21 @@ export default function App() {
     setOpen(true)
   }
 
-  /* Selector de opciones + botón, compartido por el Top y el catálogo. Sin
-     elegir, el botón pide el talle: así nadie se lleva una S por no mirar */
-  const buyRow = (p) => {
-    const opt = optFor(p)
-    const sizes = isSizes(p.opts)
-    return (
-      <>
-        {p.opts.length > 1 && (
-          <div className={`opt-picker${sizes ? ' sizes' : ''}`} role="group" aria-label={`${sizes ? 'Talle' : 'Opción'} de ${p.name}`}>
-            {p.opts.map((o) => (
-              <button
-                key={o.v}
-                className={`opt-btn${o.v === opt?.v ? ' active' : ''}`}
-                aria-pressed={o.v === opt?.v}
-                onClick={() => setPicked((prev) => ({ ...prev, [p.id]: o.v }))}
-              >
-                {o.v}
-              </button>
-            ))}
-          </div>
-        )}
-        <div className="card-actions">
-          <button className="add-btn" disabled={!opt} onClick={() => add(p)}>
-            {opt ? 'Agregar' : sizes ? 'Elegí tu talle' : 'Elegí una opción'}
-          </button>
-        </div>
-      </>
-    )
+  /* Elegir o cambiar el talle de una línea; si ya había otra línea del mismo
+     producto en ese talle, se juntan en una sola */
+  const pickOpt = (i, v) => {
+    setCart((prev) => {
+      const line = prev[i]
+      const o = products.find((p) => p.id === line.id)?.opts.find((x) => x.v === v)
+      if (!o || line.opt === v) return prev
+      const j = prev.findIndex((c, k) => k !== i && c.id === line.id && c.opt === v)
+      if (j >= 0) {
+        return prev
+          .map((c, k) => (k === j ? { ...c, qty: c.qty + line.qty } : c))
+          .filter((_, k) => k !== i)
+      }
+      return prev.map((c, k) => (k === i ? { ...c, opt: v, price: o.p } : c))
+    })
   }
 
   const bump = (i, d) => {
@@ -280,7 +264,7 @@ export default function App() {
   }
 
   const checkout = async () => {
-    if (!cart.length || sending) return
+    if (!cart.length || sending || sinTalle) return
     setSending(true)
     const ciudad = form.zona === 'bcn' ? 'Barcelona' : form.ciudad.trim()
     const email = form.email.trim()
@@ -445,7 +429,9 @@ export default function App() {
                         <h3 className="card-name">{p.name}</h3>
                         <span className="card-price">{priceOf(p)}</span>
                       </div>
-                      {buyRow(p)}
+                      <div className="card-actions">
+                        <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                      </div>
                     </div>
                   </article>
                 ))}
@@ -546,7 +532,9 @@ export default function App() {
                     <span className="card-price">{priceOf(p)}</span>
                   </div>
                   <p className="card-desc">{p.desc}</p>
-                  {buyRow(p)}
+                  <div className="card-actions">
+                    <button className="add-btn" onClick={() => add(p)}>Agregar</button>
+                  </div>
                 </div>
               </article>
             ))}
@@ -672,8 +660,12 @@ export default function App() {
 
       <CartDrawer
         open={open}
-        /* La foto sale del catálogo: los carritos guardados de antes no la traen */
-        cart={cart.map((c) => ({ ...c, img: products.find((p) => p.id === c.id)?.img }))}
+        /* La foto y las opciones salen del catálogo: los carritos guardados no las traen */
+        cart={cart.map((c) => {
+          const p = products.find((x) => x.id === c.id)
+          const opts = p?.opts.length > 1 ? p.opts : []
+          return { ...c, img: p?.img, opts, sizes: opts.length > 0 && isSizes(opts) }
+        })}
         form={form}
         ship={ship}
         disc={disc}
@@ -684,6 +676,8 @@ export default function App() {
         total={total}
         onClose={() => setOpen(false)}
         onBump={bump}
+        onPickOpt={pickOpt}
+        sinTalle={sinTalle}
         onField={field}
         onCheckout={checkout}
         onApplyCode={applyCode}
