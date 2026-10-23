@@ -407,14 +407,7 @@ export default function App() {
 
         <section id="productos" className="container catalog" ref={catalogTop}>
           <div className="catalog-head">
-            <div className="catalog-title">
-              <h2 className="section-title">El catálogo</h2>
-              {!loading && (
-                <span className="catalog-count" aria-live="polite">
-                  {shown.length} {shown.length === 1 ? 'producto' : 'productos'}
-                </span>
-              )}
-            </div>
+            <h2 className="section-title">El catálogo</h2>
             <div className="search">
               <SearchIcon />
               <input
