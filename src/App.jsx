@@ -564,7 +564,6 @@ export default function App() {
         target="_blank"
         rel="noopener noreferrer"
         className="float-wa"
-        pack={pack}
         aria-label="Escribinos por WhatsApp"
         title="Escribinos por WhatsApp"
       >
@@ -577,6 +576,7 @@ export default function App() {
         form={form}
         ship={ship}
         disc={disc}
+        pack={pack}
         discount={discount}
         checking={checking}
         subtotal={subtotal}
