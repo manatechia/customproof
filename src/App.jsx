@@ -32,7 +32,12 @@ const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envi
    y del momento, y uno aprobado hace tres días no tiene que resucitar al recargar */
 const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 
-const MARQUEE = 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
+/* Black Week: hasta el 15/11 inclusive (hora de Barcelona) el marquee pasa a blanco y negro */
+const BLACK_WEEK = Date.now() < Date.parse('2026-11-16T00:00:00+01:00')
+
+const MARQUEE = BLACK_WEEK
+  ? 'BLACK WEEK ☆ DEL 9 AL 15 DE NOVIEMBRE ☆ 30% DE DESCUENTO ☆ '
+  : 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
@@ -333,7 +338,7 @@ export default function App() {
           </div>
         </section>
 
-        <div className="marquee">
+        <div className={BLACK_WEEK ? 'marquee marquee-bw' : 'marquee'}>
           <div className="marquee-track">
             <span>{MARQUEE + MARQUEE}</span>
             <span aria-hidden="true">{MARQUEE + MARQUEE}</span>
