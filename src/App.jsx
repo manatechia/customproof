@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { shippingFor, formatAddress } from './shipping.js'
-import { discountFor, normalizeCode, packFor } from './discount.js'
+import { discountFor, normalizeCode, packFor, PACK } from './discount.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
@@ -35,9 +35,12 @@ const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 /* Black Week: hasta el 15/11 inclusive (hora de Barcelona) el marquee pasa a blanco y negro */
 const BLACK_WEEK = Date.now() < Date.parse('2026-11-16T00:00:00+01:00')
 
+/* La promo del pack es permanente: va en el marquee con y sin Black Week */
+const PROMO_PACK = `PROMO ${PACK.size} STICKERS X ${PACK.price}€ ☆ `
+
 const MARQUEE = BLACK_WEEK
-  ? 'BLACK WEEK ☆ DEL 9 AL 15 DE NOVIEMBRE ☆ 30% DE DESCUENTO ☆ '
-  : 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
+  ? 'BLACK WEEK ☆ DEL 9 AL 15 DE NOVIEMBRE ☆ 30% DE DESCUENTO ☆ ' + PROMO_PACK
+  : PROMO_PACK + 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
 export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
