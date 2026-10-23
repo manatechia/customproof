@@ -28,3 +28,32 @@ export function discountFor(subtotal, pct) {
     value: `−${eur(amount)}`,
   }
 }
+
+/* Promo fija: cada 7 stickers (mezclables entre diseños) salen 10 €. Corre
+   antes que el código: el porcentaje se aplica sobre el precio ya con pack. */
+export const PACK = { cat: 'Stickers', size: 7, price: 10 }
+
+/* `lines` son [{ cat, price, qty }]. Los packs se arman con las unidades más
+   caras, que es lo que más ahorra al cliente si algún día hay precios
+   distintos; un pack que no ahorra (unidades que suman menos de 10 €) no cuenta. */
+export function packFor(lines) {
+  const units = lines
+    .filter((l) => l.cat === PACK.cat)
+    .flatMap((l) => Array(l.qty).fill(l.price))
+    .sort((a, b) => b - a)
+  const packs = Math.floor(units.length / PACK.size)
+  let amount = 0
+  for (let k = 0; k < packs; k++) {
+    const sum = units.slice(k * PACK.size, (k + 1) * PACK.size).reduce((a, p) => a + p, 0)
+    amount += Math.max(0, sum - PACK.price)
+  }
+  amount = Math.round(amount * 100) / 100
+  return {
+    packs,
+    amount,
+    /* Cuántos stickers faltan para el próximo pack, para avisarlo en el carrito */
+    missing: units.length ? PACK.size - (units.length % PACK.size) : 0,
+    label: packs > 1 ? `Promo ${PACK.size} stickers x ${PACK.price} € (x${packs})` : `Promo ${PACK.size} stickers x ${PACK.price} €`,
+    value: amount ? `−${eur(amount)}` : '',
+  }
+}

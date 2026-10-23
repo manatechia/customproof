@@ -1,9 +1,9 @@
 import { eur } from '../data.js'
 import { PICKUP, FREE_FROM, BCN_COST } from '../shipping.js'
-import { normalizeCode } from '../discount.js'
+import { normalizeCode, PACK } from '../discount.js'
 
 export default function CartDrawer({
-  open, cart, form, ship, disc, discount, checking, subtotal, total,
+  open, cart, form, ship, disc, pack, discount, checking, subtotal, total,
   onClose, onBump, onField, onCheckout, onApplyCode, sending,
 }) {
   const bcn = form.zona === 'bcn'
@@ -13,7 +13,7 @@ export default function CartDrawer({
   /* El descuento puede bajar el subtotal debajo del umbral y hacer que el total
      SUBA: hay que avisarlo o parece un error de la web */
   const pierdeEnvioGratis =
-    disc.pct > 0 && bcn && !ship.pickup && subtotal >= FREE_FROM && disc.net < FREE_FROM
+    disc.pct > 0 && bcn && !ship.pickup && subtotal - pack.amount >= FREE_FROM && disc.net < FREE_FROM
 
   return (
     <>
@@ -264,12 +264,25 @@ export default function CartDrawer({
           </div>
 
           <div className="drawer-foot">
+            {/* Solo cuando el próximo pack está cerca: con 1 sticker suena a presión */}
+            {pack.missing > 0 && pack.missing <= 3 && (
+              <p className="field-note">
+                Sumá {pack.missing} sticker{pack.missing > 1 ? 's' : ''} más y {pack.packs ? 'otro pack' : 'el pack'} de{' '}
+                {PACK.size} te sale a {PACK.price} €.
+              </p>
+            )}
             {cart.length > 0 && (
               <div className="sum">
                 <div className="sum-row">
                   <span>Subtotal</span>
                   <span>{eur(subtotal)}</span>
                 </div>
+                {pack.amount > 0 && (
+                  <div className="sum-row sum-row-off">
+                    <span>{pack.label}</span>
+                    <span>{pack.value}</span>
+                  </div>
+                )}
                 {disc.pct > 0 && (
                   <div className="sum-row sum-row-off">
                     <span>{disc.label}</span>

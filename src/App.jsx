@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { STEPS, EMAIL, PHONE_LABEL, eur, waLink } from './data.js'
 import { shippingFor, formatAddress } from './shipping.js'
-import { discountFor, normalizeCode } from './discount.js'
+import { discountFor, normalizeCode, packFor } from './discount.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
@@ -109,7 +109,9 @@ export default function App() {
   const featured = products.filter((p) => p.dest).slice(0, 5)
   const count = cart.reduce((a, c) => a + c.qty, 0)
   const subtotal = cart.reduce((a, c) => a + c.price * c.qty, 0)
-  const disc = discountFor(subtotal, discount.pct)
+  /* La categoría sale del catálogo: los carritos guardados de antes no la traen */
+  const pack = packFor(cart.map((c) => ({ ...c, cat: products.find((p) => p.id === c.id)?.cat ?? c.cat })))
+  const disc = discountFor(subtotal - pack.amount, discount.pct)
   /* El envío depende de la zona y del subtotal ya descontado: se recalcula en cada render */
   const ship = shippingFor(form, disc.net)
   const total = disc.net + ship.cost
@@ -157,7 +159,7 @@ export default function App() {
     setCart((prev) => {
       const i = prev.findIndex((c) => c.id === p.id && c.opt === opt.v)
       if (i >= 0) return prev.map((c, j) => (j === i ? { ...c, qty: c.qty + 1 } : c))
-      return [...prev, { id: p.id, name: p.name, opt: opt.v, price: opt.p, qty: 1, tint: p.tint }]
+      return [...prev, { id: p.id, name: p.name, cat: p.cat, opt: opt.v, price: opt.p, qty: 1, tint: p.tint }]
     })
     setOpen(true)
   }
@@ -229,7 +231,7 @@ export default function App() {
     /* El servidor pudo rechazar el código o no haber podido comprobarlo: el
        mensaje tiene que decir lo que realmente se aplicó, no lo que mostraba
        el carrito */
-    const applied = discountFor(subtotal, pct)
+    const applied = discountFor(subtotal - pack.amount, pct)
     const shipOut = shippingFor(form, applied.net)
     const totalOut = applied.net + shipOut.cost
     const lines = cart.map((c) => `• ${c.qty}x ${c.name}${c.opt ? ` (${c.opt})` : ''} — ${eur(c.price * c.qty)}`)
@@ -240,6 +242,7 @@ export default function App() {
       ...lines,
       '',
       `Subtotal: ${eur(subtotal)}`,
+      pack.amount ? `${pack.label}: ${pack.value}` : null,
       applied.pct ? `Descuento ${codigo} (${applied.pct}%): ${applied.value}` : null,
       `${shipOut.label}: ${shipOut.value}`,
       `Total estimado: ${eur(totalOut)}${shipOut.quote ? ' + envío' : ''}`,
@@ -570,6 +573,7 @@ export default function App() {
         target="_blank"
         rel="noopener noreferrer"
         className="float-wa"
+        pack={pack}
         aria-label="Escribinos por WhatsApp"
         title="Escribinos por WhatsApp"
       >

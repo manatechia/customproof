@@ -2,7 +2,7 @@ import { fetchCatalogFromSheet } from '../lib/catalog.js'
 import { appendVentaRow, appendCanjeRow } from '../lib/sheets.js'
 import { validateCode } from '../lib/discounts.js'
 import { shippingFor, formatAddress, ZONAS, PICKUP } from '../src/shipping.js'
-import { discountFor, normalizeCode } from '../src/discount.js'
+import { discountFor, normalizeCode, packFor } from '../src/discount.js'
 
 const bad = (msg, status = 400) => Response.json({ error: msg }, { status })
 
@@ -52,6 +52,7 @@ export async function POST(request) {
 
   /* Los precios salen siempre del sheet, nunca del cliente */
   const lines = []
+  const priced = []
   let subtotal = 0
   for (const { id, opt, qty } of items) {
     const p = catalog.find((x) => x.id === id)
@@ -59,7 +60,9 @@ export async function POST(request) {
     if (!p || !o) return bad(`Un producto del carrito ya no está disponible (${id})`)
     lines.push(`${qty}x ${o.v ? `${p.name} (${o.v})` : p.name}`)
     subtotal += o.p * qty
+    priced.push({ cat: p.cat, price: o.p, qty })
   }
+  const pack = packFor(priced)
 
   /* El código se revalida siempre acá: /api/discount es solo feedback del carrito */
   let codigo = normalizeCode(d.codigo)
@@ -79,7 +82,8 @@ export async function POST(request) {
     }
   }
 
-  const disc = discountFor(subtotal, pct)
+  /* El código va sobre el precio con pack, y el envío sobre lo que queda */
+  const disc = discountFor(subtotal - pack.amount, pct)
   /* El envío gratis se mide contra el subtotal ya descontado */
   const ship = shippingFor({ zona, entrega }, disc.net)
   if (ship.needsAddress && (!calle || !/^\d{5}$/.test(cp))) return bad('Falta la dirección de envío')
@@ -103,7 +107,7 @@ export async function POST(request) {
       nombre,
       '', email,
       direccion,
-      `${lines.join(' | ')} || ${ship.entrega}`,
+      `${lines.join(' | ')}${pack.amount ? ` || ${pack.label}: -${conComa(pack.amount)}` : ''} || ${ship.entrega}`,
       conComa(total),
       'a coordinar por WhatsApp',
       '',
