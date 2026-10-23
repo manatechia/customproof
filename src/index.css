@@ -111,6 +111,14 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .cats { display: flex; gap: 10px; flex-wrap: wrap; }
 .cat-btn { background: transparent; color: var(--muted); border: 2px solid var(--line-3); border-radius: 999px; padding: 9px 18px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; cursor: pointer; }
 .cat-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+/* Subcategorías: segundo nivel del filtro, más chico y sobre panel para que no
+   compita con las categorías; la activa toma el celeste de la marca */
+.subcats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line-2); animation: cpsubin .25s ease-out; }
+.subcat-btn { background: var(--panel); color: var(--muted); border: 1.5px solid var(--line-2); border-radius: 999px; padding: 7px 15px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; transition: border-color .15s, color .15s, background .15s; }
+.subcat-btn:hover { color: var(--ink); border-color: var(--line-4); }
+.subcat-btn.active { color: var(--ink); border-color: var(--celeste); background: color-mix(in srgb, var(--celeste) 16%, var(--panel)); }
+@keyframes cpsubin { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .subcats { animation: none; } }
 /* Buscador: misma pastilla que los chips de categoría, con la lupa adentro */
 .search { display: flex; align-items: center; gap: 8px; border: 2px solid var(--line-3); border-radius: 999px; padding: 0 14px; height: 44px; width: 260px; color: var(--muted-3); }
 .search:focus-within { border-color: var(--ink); color: var(--ink); }
@@ -229,6 +237,10 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
      y los chips arrancan a la izquierda como el resto de la sección */
   .catalog-tools { width: 100%; gap: 14px; justify-content: flex-start; }
   .search { width: 100%; }
+  /* En móvil las subcategorías van en una tira que se desliza con el dedo:
+     envueltas ocuparían media pantalla antes del primer producto */
+  .subcats { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 18px -16px 0; padding: 18px 16px 2px; }
+  .subcats::-webkit-scrollbar { display: none; }
   .catalog-empty { font-size: 15.5px; margin-top: 24px; }
 
   .pager { margin-top: 28px; gap: 8px; }

@@ -46,6 +46,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
   const [catalog, setCatalog] = useState(null) /* null = cargando: se muestran skeletons */
   const [cat, setCat] = useState('Todo')
+  const [sub, setSub] = useState('') /* '' = todas las subcategorías */
   const [term, setTerm] = useState('')
   const [page, setPage] = useState(1)
   /* Persistido en localStorage para sobrevivir el redirect a Stripe y la vuelta */
@@ -100,9 +101,19 @@ export default function App() {
   const loading = catalog === null
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
+  /* Subcategorías de la categoría elegida, en el orden en que aparecen en el
+     catálogo. En "Todo" no hay fila: mezclaría las de stickers con las de ropa */
+  const subs = cat === 'Todo'
+    ? []
+    : [...new Set(products.filter((p) => p.cat === cat).flatMap((p) => p.subs ?? []))]
+  /* Derivada: si la subcategoría elegida desaparece del sheet, vuelve a "Todas" */
+  const activeSub = subs.includes(sub) ? sub : ''
   const query = norm(term)
   const shown = products.filter(
-    (p) => (cat === 'Todo' || p.cat === cat) && (!query || norm(p.name).includes(query))
+    (p) =>
+      (cat === 'Todo' || p.cat === cat) &&
+      (!activeSub || p.subs?.includes(activeSub)) &&
+      (!query || norm([p.name, ...(p.subs ?? [])].join(' ')).includes(query))
   )
   const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE))
   /* Derivado y no guardado: si el filtro achica el catálogo, la página se acota sola */
@@ -142,6 +153,13 @@ export default function App() {
 
   const pickCat = (c) => {
     setCat(c)
+    setSub('')
+    setPage(1)
+  }
+
+  /* Tocar la subcategoría activa la suelta: vuelve a mostrar toda la categoría */
+  const pickSub = (s) => {
+    setSub(s === activeSub ? '' : s)
     setPage(1)
   }
 
@@ -413,6 +431,27 @@ export default function App() {
               </div>
             </div>
           </div>
+          {!loading && subs.length > 0 && (
+            <div className="subcats" key={cat} role="group" aria-label={`Subcategorías de ${cat}`}>
+              <button
+                className={`subcat-btn${!activeSub ? ' active' : ''}`}
+                aria-pressed={!activeSub}
+                onClick={() => pickSub('')}
+              >
+                Todas
+              </button>
+              {subs.map((s) => (
+                <button
+                  key={s}
+                  className={`subcat-btn${s === activeSub ? ' active' : ''}`}
+                  aria-pressed={s === activeSub}
+                  onClick={() => pickSub(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="grid">
             {loading && Array.from({ length: 6 }, (_, i) => (
               <article className="card skel-card" key={i}>
