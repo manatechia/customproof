@@ -82,9 +82,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 /* Marquee */
 .marquee { background: var(--yellow); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); overflow: hidden; padding: 11px 0; }
 .marquee-track { display: flex; width: max-content; animation: cpmarquee 26s linear infinite; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; color: #000; white-space: nowrap; }
-.marquee-bw { background: #000; border-color: #fff; }
-.marquee-bw .marquee-track { color: #fff; letter-spacing: .04em; }
 .marquee-track span { padding-right: 28px; }
+.marquee-bw { background: #000; border-color: #000; }
+.marquee-bw .marquee-track { color: var(--yellow); letter-spacing: .04em; }
 
 /* Destacados */
 /* Banda de fondo a todo el ancho, como el marquee */

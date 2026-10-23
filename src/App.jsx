@@ -35,11 +35,11 @@ const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 /* Black Week: hasta el 15/11 inclusive (hora de Barcelona) el marquee pasa a blanco y negro */
 const BLACK_WEEK = Date.now() < Date.parse('2026-11-16T00:00:00+01:00')
 
-/* La promo del pack es permanente: va en el marquee con y sin Black Week */
+/* La promo del pack va en el marquee, salvo en Black Week que se queda solo con el 30% */
 const PROMO_PACK = `PROMO ${PACK.size} STICKERS X ${PACK.price}€ ☆ `
 
 const MARQUEE = BLACK_WEEK
-  ? 'BLACK WEEK ☆ DEL 9 AL 15 DE NOVIEMBRE ☆ 30% DE DESCUENTO ☆ ' + PROMO_PACK
+  ? 'BLACK WEEK ☆ DEL 9 AL 15 DE NOVIEMBRE ☆ 30% DE DESCUENTO ☆ '
   : PROMO_PACK + 'STICKERS DIE-CUT, RESISTENTES AL AGUA, AL SOL Y RAYONES ☆ Y MUCHOS PRODUCTOS PERSONALIZADOS! ☆ ENVÍOS GRATIS A BARCELONA A PARTIR DE 25€ ☆ '
 
 export default function App() {
