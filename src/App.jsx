@@ -32,7 +32,9 @@ const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envi
    y del momento, y uno aprobado hace tres días no tiene que resucitar al recargar */
 const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 
-/* Paleta de la marca para los puntos de color de las categorías */
+/* Color fijo de cada categoría conocida: no cambia aunque cambie el orden del
+   sheet. Las que no estén acá rotan la paleta; "Otros" va en gris */
+const CAT_COLORS = { stickers: 'var(--yellow)', ropa: 'var(--pink)', tazas: 'var(--celeste)', otros: 'var(--muted-3)' }
 const DOTS = ['var(--yellow)', 'var(--celeste)', 'var(--pink)']
 
 /* Opciones que son talles de ropa (S, M, XL, 2XL…): cambian el texto del botón */
@@ -112,10 +114,10 @@ export default function App() {
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
   /* Cuántos productos hay en cada categoría: el número del chip no depende de la búsqueda */
   const catCount = products.reduce((acc, p) => ({ ...acc, [p.cat]: (acc[p.cat] ?? 0) + 1 }), { Todo: products.length })
-  /* Punto de color de cada categoría: rota la paleta de la marca en el orden del
-     catálogo; "Otros" va en gris y "Todo" lleva los tres (lo pinta el CSS) */
+  /* Punto de color de cada categoría (y de su colección elegida); "Todo" lleva
+     los tres colores y lo pinta el CSS */
   const catDot = (c) =>
-    c === 'Todo' ? undefined : c === 'Otros' ? 'var(--muted-3)' : DOTS[(cats.indexOf(c) - 1) % DOTS.length]
+    c === 'Todo' ? undefined : CAT_COLORS[c.toLowerCase()] ?? DOTS[(cats.indexOf(c) - 1) % DOTS.length]
   /* Subcategorías de la categoría elegida, en el orden en que aparecen en el
      catálogo. En "Todo" no hay fila: mezclaría las de stickers con las de ropa */
   const subs = cat === 'Todo'
@@ -489,7 +491,7 @@ export default function App() {
                   ))}
             </div>
             {!loading && subs.length > 0 && (
-              <div className="subcats" key={cat}>
+              <div className="subcats" key={cat} style={{ '--accent': catDot(cat) }}>
                 <span className="subcats-label" id="subcats-label">Colecciones</span>
                 <div className="subcats-list" role="group" aria-labelledby="subcats-label">
                   <button

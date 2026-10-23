@@ -123,8 +123,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .subcats-list { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 3px 3px 0; }
 .subcat-btn { background: var(--bg); color: var(--ink); border: 2px solid var(--line-3); border-radius: 999px; padding: 6px 15px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; transition: border-color .15s; }
 .subcat-btn:hover { border-color: var(--ink); }
-/* La elegida es una pastilla de la marca: celeste, borde y sombra dura como el botón principal */
-.subcat-btn.active { background: var(--celeste); color: #000; border-color: var(--ink); font-weight: 600; box-shadow: 2px 2px 0 var(--ink); }
+/* La elegida es una pastilla de la marca, con borde y sombra dura como el botón
+   principal, pintada del color del punto de su categoría (--accent) */
+.subcat-btn.active { background: var(--accent, var(--celeste)); color: #000; border-color: var(--ink); font-weight: 600; box-shadow: 2px 2px 0 var(--ink); }
 @keyframes cpsubin { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .subcats { animation: none; } }
 /* Buscador: misma pastilla que los chips de categoría, con la lupa adentro */
