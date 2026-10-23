@@ -106,21 +106,31 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 /* Catálogo */
 .catalog { padding-top: 64px; padding-bottom: 20px; scroll-margin-top: 80px; }
 .catalog-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.catalog-title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
 .section-title { font-weight: 700; font-size: 44px; margin: 0; letter-spacing: -.01em; }
-.catalog-tools { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
-.cats { display: flex; gap: 10px; flex-wrap: wrap; }
-.cat-btn { background: transparent; color: var(--muted); border: 2px solid var(--line-3); border-radius: 999px; padding: 9px 18px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; cursor: pointer; }
-.cat-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-/* Subcategorías: segundo nivel del filtro, más chico y sobre panel para que no
-   compita con las categorías; la activa toma el celeste de la marca */
-.subcats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line-2); animation: cpsubin .25s ease-out; }
-.subcat-btn { background: var(--panel); color: var(--muted); border: 1.5px solid var(--line-2); border-radius: 999px; padding: 7px 15px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; transition: border-color .15s, color .15s, background .15s; }
-.subcat-btn:hover { color: var(--ink); border-color: var(--line-4); }
-.subcat-btn.active { color: var(--ink); border-color: var(--celeste); background: color-mix(in srgb, var(--celeste) 16%, var(--panel)); }
+.catalog-count { color: var(--muted-3); font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; }
+/* Panel de filtros: categorías arriba y, si la categoría tiene, sus colecciones
+   abajo, separadas por una línea punteada como de troquel */
+.filters { margin-top: 24px; background: var(--panel); border: 2px solid var(--line-2); border-radius: 22px; padding: 8px; }
+.cat-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.cat-tab { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--ink); border: 0; border-radius: 999px; padding: 10px 18px; font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; transition: background .15s; }
+.cat-tab:hover { background: var(--line-6); }
+.cat-tab.active { background: var(--ink); color: var(--bg); }
+.cat-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.cat-dot.all { background: conic-gradient(var(--yellow) 0 33%, var(--celeste) 0 66%, var(--pink) 0); }
+.cat-count { color: var(--muted-3); font-weight: 500; font-size: 13px; }
+.cat-tab.active .cat-count { color: inherit; opacity: .6; }
+.subcats { display: flex; align-items: center; gap: 12px; margin: 8px 4px 0; padding: 12px 6px 6px; border-top: 2px dashed var(--line-3); animation: cpsubin .25s ease-out; }
+.subcats-label { color: var(--muted-3); font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; flex: none; }
+.subcats-list { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 3px 3px 0; }
+.subcat-btn { background: var(--bg); color: var(--ink); border: 2px solid var(--line-3); border-radius: 999px; padding: 6px 15px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; transition: border-color .15s; }
+.subcat-btn:hover { border-color: var(--ink); }
+/* La elegida es una pastilla de la marca: celeste, borde y sombra dura como el botón principal */
+.subcat-btn.active { background: var(--celeste); color: #000; border-color: var(--ink); font-weight: 600; box-shadow: 2px 2px 0 var(--ink); }
 @keyframes cpsubin { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .subcats { animation: none; } }
 /* Buscador: misma pastilla que los chips de categoría, con la lupa adentro */
-.search { display: flex; align-items: center; gap: 8px; border: 2px solid var(--line-3); border-radius: 999px; padding: 0 14px; height: 44px; width: 260px; color: var(--muted-3); }
+.search { display: flex; align-items: center; gap: 8px; border: 2px solid var(--line-3); border-radius: 999px; padding: 0 14px; height: 48px; width: 340px; color: var(--muted-3); background: var(--panel); }
 .search:focus-within { border-color: var(--ink); color: var(--ink); }
 .search-input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--ink); font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; }
 .search-input::placeholder { color: var(--muted-3); }
@@ -235,12 +245,15 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
   .catalog-head { gap: 16px; }
   /* En móvil el buscador va a todo el ancho, arriba de las categorías,
      y los chips arrancan a la izquierda como el resto de la sección */
-  .catalog-tools { width: 100%; gap: 14px; justify-content: flex-start; }
   .search { width: 100%; }
-  /* En móvil las subcategorías van en una tira que se desliza con el dedo:
+  /* En móvil cada fila del panel es una tira que se desliza con el dedo:
      envueltas ocuparían media pantalla antes del primer producto */
-  .subcats { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 18px -16px 0; padding: 18px 16px 2px; }
-  .subcats::-webkit-scrollbar { display: none; }
+  .filters { margin-top: 18px; border-radius: 18px; padding: 6px; }
+  .cat-tabs, .subcats-list { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .cat-tabs::-webkit-scrollbar, .subcats-list::-webkit-scrollbar { display: none; }
+  .cat-tab { padding: 9px 14px; font-size: 14.5px; }
+  .subcats { flex-direction: column; align-items: stretch; gap: 8px; padding: 10px 2px 4px; min-width: 0; }
+  .subcats-label { padding-left: 4px; }
   .catalog-empty { font-size: 15.5px; margin-top: 24px; }
 
   .pager { margin-top: 28px; gap: 8px; }

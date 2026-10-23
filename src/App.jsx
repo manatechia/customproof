@@ -32,6 +32,9 @@ const EMPTY_FORM = { nombre: '', email: '', zona: '', ciudad: '', entrega: 'envi
    y del momento, y uno aprobado hace tres días no tiene que resucitar al recargar */
 const NO_DISCOUNT = { pct: 0, code: '', msg: '', ok: false }
 
+/* Paleta de la marca para los puntos de color de las categorías */
+const DOTS = ['var(--yellow)', 'var(--celeste)', 'var(--pink)']
+
 /* Black Week: hasta el 15/11 inclusive (hora de Barcelona) el marquee pasa a blanco y negro */
 const BLACK_WEEK = Date.now() < Date.parse('2026-11-16T00:00:00+01:00')
 
@@ -101,6 +104,12 @@ export default function App() {
   const loading = catalog === null
   const products = catalog ?? []
   const cats = ['Todo', ...new Set(products.map((p) => p.cat))]
+  /* Cuántos productos hay en cada categoría: el número del chip no depende de la búsqueda */
+  const catCount = products.reduce((acc, p) => ({ ...acc, [p.cat]: (acc[p.cat] ?? 0) + 1 }), { Todo: products.length })
+  /* Punto de color de cada categoría: rota la paleta de la marca en el orden del
+     catálogo; "Otros" va en gris y "Todo" lleva los tres (lo pinta el CSS) */
+  const catDot = (c) =>
+    c === 'Todo' ? undefined : c === 'Otros' ? 'var(--muted-3)' : DOTS[(cats.indexOf(c) - 1) % DOTS.length]
   /* Subcategorías de la categoría elegida, en el orden en que aparecen en el
      catálogo. En "Todo" no hay fila: mezclaría las de stickers con las de ropa */
   const subs = cat === 'Todo'
@@ -398,60 +407,72 @@ export default function App() {
 
         <section id="productos" className="container catalog" ref={catalogTop}>
           <div className="catalog-head">
-            <h2 className="section-title">El catálogo</h2>
-            <div className="catalog-tools">
-              <div className="search">
-                <SearchIcon />
-                <input
-                  type="search"
-                  className="search-input"
-                  placeholder="Buscar por nombre…"
-                  aria-label="Buscar productos por nombre"
-                  value={term}
-                  onChange={(e) => search(e.target.value)}
-                  disabled={loading}
-                />
-                {term && (
-                  <button className="search-clear" aria-label="Borrar búsqueda" onClick={() => search('')}>×</button>
-                )}
-              </div>
-              <div className="cats">
-                {loading
-                  ? [72, 96, 80, 88].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
-                  : cats.map((c) => (
-                      <button
-                        key={c}
-                        className={`cat-btn${c === cat ? ' active' : ''}`}
-                        aria-pressed={c === cat}
-                        onClick={() => pickCat(c)}
-                      >
-                        {c}
-                      </button>
-                    ))}
-              </div>
+            <div className="catalog-title">
+              <h2 className="section-title">El catálogo</h2>
+              {!loading && (
+                <span className="catalog-count" aria-live="polite">
+                  {shown.length} {shown.length === 1 ? 'producto' : 'productos'}
+                </span>
+              )}
+            </div>
+            <div className="search">
+              <SearchIcon />
+              <input
+                type="search"
+                className="search-input"
+                placeholder="Buscar stickers, colecciones…"
+                aria-label="Buscar productos por nombre o colección"
+                value={term}
+                onChange={(e) => search(e.target.value)}
+                disabled={loading}
+              />
+              {term && (
+                <button className="search-clear" aria-label="Borrar búsqueda" onClick={() => search('')}>×</button>
+              )}
             </div>
           </div>
-          {!loading && subs.length > 0 && (
-            <div className="subcats" key={cat} role="group" aria-label={`Subcategorías de ${cat}`}>
-              <button
-                className={`subcat-btn${!activeSub ? ' active' : ''}`}
-                aria-pressed={!activeSub}
-                onClick={() => pickSub('')}
-              >
-                Todas
-              </button>
-              {subs.map((s) => (
-                <button
-                  key={s}
-                  className={`subcat-btn${s === activeSub ? ' active' : ''}`}
-                  aria-pressed={s === activeSub}
-                  onClick={() => pickSub(s)}
-                >
-                  {s}
-                </button>
-              ))}
+          <div className="filters">
+            <div className="cat-tabs" role="group" aria-label="Categorías">
+              {loading
+                ? [72, 110, 90, 96].map((w, i) => <span className="skel-chip" key={i} style={{ width: w }} />)
+                : cats.map((c) => (
+                    <button
+                      key={c}
+                      className={`cat-tab${c === cat ? ' active' : ''}`}
+                      aria-pressed={c === cat}
+                      onClick={() => pickCat(c)}
+                    >
+                      <span className={`cat-dot${c === 'Todo' ? ' all' : ''}`} style={{ background: catDot(c) }} />
+                      {c}
+                      <span className="cat-count">{catCount[c]}</span>
+                    </button>
+                  ))}
             </div>
-          )}
+            {!loading && subs.length > 0 && (
+              <div className="subcats" key={cat}>
+                <span className="subcats-label" id="subcats-label">Colecciones</span>
+                <div className="subcats-list" role="group" aria-labelledby="subcats-label">
+                  <button
+                    className={`subcat-btn${!activeSub ? ' active' : ''}`}
+                    aria-pressed={!activeSub}
+                    onClick={() => pickSub('')}
+                  >
+                    Todas
+                  </button>
+                  {subs.map((s) => (
+                    <button
+                      key={s}
+                      className={`subcat-btn${s === activeSub ? ' active' : ''}`}
+                      aria-pressed={s === activeSub}
+                      onClick={() => pickSub(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div className="grid">
             {loading && Array.from({ length: 6 }, (_, i) => (
               <article className="card skel-card" key={i}>
