@@ -36,7 +36,9 @@ export default function CartDrawer({
             ) : (
               cart.map((c, i) => (
                 <div className="cart-item" key={`${c.id}-${c.opt}`}>
-                  <div className="cart-swatch" style={{ background: c.tint }} />
+                  {c.img
+                    ? <img className="cart-swatch cart-img" src={c.img} alt={c.name} decoding="async" />
+                    : <div className="cart-swatch" style={{ background: c.tint }} />}
                   <div className="cart-item-body">
                     <div className="cart-item-name">{c.name}</div>
                     {c.opt && <div className="cart-item-opt">{c.opt}</div>}

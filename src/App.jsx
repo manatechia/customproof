@@ -670,7 +670,8 @@ export default function App() {
 
       <CartDrawer
         open={open}
-        cart={cart}
+        /* La foto sale del catálogo: los carritos guardados de antes no la traen */
+        cart={cart.map((c) => ({ ...c, img: products.find((p) => p.id === c.id)?.img }))}
         form={form}
         ship={ship}
         disc={disc}

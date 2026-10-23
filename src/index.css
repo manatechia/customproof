@@ -333,6 +333,7 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .cart-item { display: flex; gap: 14px; border: 2px solid var(--line-5); border-radius: 18px; padding: 14px; }
 .cart-swatch { width: 56px; height: 56px; border-radius: 12px; flex: none; }
 .cart-item-body { flex: 1; min-width: 0; }
+.cart-img { object-fit: contain; display: block; }
 .cart-item-name { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; }
 .cart-item-opt { font-size: 13px; color: var(--muted-5); margin-top: 2px; }
 .cart-item-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
