@@ -28,6 +28,9 @@ const SORTS = {
   precio: { label: 'Precio', get: price, cmp: (a, b) => a - b, first: 'asc' },
 }
 
+/* "2026-10-25 14:03" o "2026-10-25" -> "25/10/2026" */
+const fmtDate = (s) => (s ? s.slice(0, 10).split('-').reverse().join('/') : '')
+
 function sortProducts(list, { key, dir }) {
   const s = SORTS[key]
   const sign = dir === 'asc' ? 1 : -1
@@ -174,7 +177,8 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
             <tr>
               <th className="adm-check"><input type="checkbox" checked={allShownSelected} onChange={toggleAll} aria-label="Seleccionar todos los que se ven" /></th>
               <th>Foto</th>
-              {th('fecha', 'Id')}
+              <th>Id</th>
+              {th('fecha', 'Creado')}
               {th('titulo', 'Título')}
               {th('categoria', 'Categoría')}
               {th('sub', 'Subcategorías')}
@@ -198,6 +202,13 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
                     </div>
                   </td>
                   <td className="adm-id">{p.editable ? p.id : <span className="adm-warn" title="Id repetido en la hoja">{p.id} ⚠</span>}</td>
+                  <td className="adm-date">
+                    {p.fecha
+                      ? <span title={p.fecha}>{fmtDate(p.fecha)}</span>
+                      : p.fechaFoto
+                        ? <span className="adm-meta" title="Aproximada: es la fecha en que se subió la foto. Los productos nuevos guardan la fecha real.">≈ {fmtDate(p.fechaFoto)}</span>
+                        : <span className="adm-meta">—</span>}
+                  </td>
                   <td className="adm-name">{p.titulo}</td>
                   <td>{p.categoria || <span className="adm-meta">—</span>}</td>
                   <td className="adm-subs">{p.subcategorias.join(', ')}</td>

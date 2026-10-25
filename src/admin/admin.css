@@ -60,6 +60,7 @@
 .adm-check { width: 36px; }
 .adm-id { color: var(--muted-2); font-variant-numeric: tabular-nums; }
 .adm-name { font-weight: 600; min-width: 180px; }
+.adm-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm-subs { color: var(--muted-2); min-width: 140px; }
 .adm-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm-empty { padding: 16px; margin: 0; }
