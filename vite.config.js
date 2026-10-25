@@ -11,6 +11,12 @@ function apiDev() {
       const env = loadEnv(server.config.mode, server.config.root, '')
       for (const [k, v] of Object.entries(env)) process.env[k] ??= v
 
+      /* /admin es otra página (admin.html), igual que el rewrite de vercel.json */
+      server.middlewares.use((req, res, next) => {
+        if (/^\/admin\/?(\?|$)/.test(req.url)) req.url = req.url.replace(/^\/admin\/?/, '/admin.html')
+        next()
+      })
+
       server.middlewares.use('/api', (req, res) => {
         (async () => {
           const name = (req.url || '/').split('?')[0].replace(/^\/+|\/+$/g, '')
@@ -47,5 +53,7 @@ function apiDev() {
 
 export default defineConfig({
   plugins: [react(), apiDev()],
+  /* El admin va en su propio bundle: nada de su código viaja con la tienda */
+  build: { rollupOptions: { input: { main: 'index.html', admin: 'admin.html' } } },
   server: { port: process.env.PORT ? Number(process.env.PORT) : 5173 },
 })

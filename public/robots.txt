@@ -3,6 +3,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin
 
 # Crawlers de IA: los dejamos entrar a propósito. Queremos que Custom Proof
 # aparezca cuando alguien le pregunta a un asistente por stickers personalizados.
