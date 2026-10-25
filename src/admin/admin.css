@@ -67,6 +67,10 @@
 .adm-subs { color: var(--muted-2); min-width: 140px; }
 .adm-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm-empty { padding: 16px; margin: 0; }
+.adm-row-del { width: 44px; text-align: center; cursor: default; }
+.adm-del-btn { background: none; border: 2px solid transparent; border-radius: 999px; color: var(--muted-3); width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.adm-del-btn:hover, .adm-del-btn:focus-visible { color: #ff6b6b; border-color: #ff6b6b; }
+.adm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .adm-thumb {
   flex: none; width: 56px; height: 56px; border-radius: 10px; overflow: hidden; background: var(--stripe-b); position: relative;

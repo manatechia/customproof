@@ -130,16 +130,20 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
     }
   }
 
-  const removeSelected = async () => {
-    const names = products.filter((p) => selected.has(p.id)).map((p) => p.titulo)
-    const list = names.slice(0, 8).join('\n· ') + (names.length > 8 ? `\n… y ${names.length - 8} más` : '')
-    if (!confirm(`¿Eliminar ${names.length} producto${names.length === 1 ? '' : 's'}?\n\n· ${list}\n\nSe borran del sheet y dejan de verse en la tienda.`)) return
+  /* Elimina los ids dados (el botón de la fila o la selección), con confirmación */
+  const remove = async (ids) => {
+    const names = products.filter((p) => ids.includes(p.id)).map((p) => p.titulo)
+    const one = names.length === 1
+    const question = one
+      ? `¿Eliminar "${names[0]}"?`
+      : `¿Eliminar ${names.length} productos?\n\n· ${names.slice(0, 8).join('\n· ')}${names.length > 8 ? `\n… y ${names.length - 8} más` : ''}`
+    if (!confirm(`${question}\n\nSe borra${one ? '' : 'n'} del sheet y deja${one ? '' : 'n'} de verse en la tienda.`)) return
     setBusy(true)
     setMsg(null)
     try {
-      const r = await api('admin-products', { method: 'DELETE', body: { ids: [...selected] } })
-      setMsg({ ok: true, text: `Eliminado${r.count === 1 ? '' : 's'} ${r.count} producto${r.count === 1 ? '' : 's'}. Se pueden recuperar desde el historial de versiones del sheet.` })
-      setSelected(new Set())
+      const r = await api('admin-products', { method: 'DELETE', body: { ids } })
+      setMsg({ ok: true, text: `${one ? `Eliminado "${names[0]}"` : `Eliminados ${r.count} productos`}. Se puede recuperar desde el historial de versiones del sheet.` })
+      setSelected((s) => { const n = new Set(s); ids.forEach((id) => n.delete(id)); return n })
       await reload()
     } catch (err) {
       if (err.auth) return onAuth()
@@ -185,7 +189,7 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
           </select>
           <button className="adm-btn" onClick={applyBulk} disabled={!bulk.value || busy}>{busy ? 'Aplicando…' : 'Aplicar'}</button>
           <button className="adm-link" onClick={() => setSelected(new Set())}>Deseleccionar</button>
-          <button className="adm-link adm-danger adm-bulk-del" onClick={removeSelected} disabled={busy}>Eliminar</button>
+          <button className="adm-link adm-danger adm-bulk-del" onClick={() => remove([...selected])} disabled={busy}>Eliminar</button>
         </div>
       )}
       {msg && <p className={msg.ok ? 'adm-ok' : 'adm-error'}>{msg.text}</p>}
@@ -204,6 +208,7 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
               {th('sub', 'Subcategorías')}
               {th('precio', 'Precio', 'adm-num')}
               <th>Estado</th>
+              <th><span className="adm-sr">Eliminar</span></th>
             </tr>
           </thead>
           <tbody>
@@ -234,6 +239,15 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
                   <td className="adm-subs">{p.subcategorias.join(', ')}</td>
                   <td className="adm-num">{p.precio ? `${p.precio} €` : '—'}</td>
                   <td>{p.activo ? 'Activo' : 'Inactivo'}{p.destacado ? ' · ★' : ''}</td>
+                  <td className="adm-row-del" onClick={(e) => e.stopPropagation()}>
+                    {p.editable && (
+                      <button className="adm-del-btn" onClick={() => remove([p.id])} disabled={busy} title="Eliminar este producto" aria-label={`Eliminar ${p.titulo}`}>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6" />
+                        </svg>
+                      </button>
+                    )}
+                  </td>
                 </tr>
               )
             })}
