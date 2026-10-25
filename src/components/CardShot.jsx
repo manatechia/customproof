@@ -9,7 +9,7 @@ const ZOOM_DELAY_MS = 700
 
 const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-/* Foto de la card: carrusel si hay más de una y zoom al dejar el mouse encima.
+/* Foto de la card: carrusel con flechas si hay más de una y zoom al dejar el mouse encima.
    `children` va encima de la foto (la etiqueta de la card). */
 export default function CardShot({ p, children }) {
   const imgs = p.imgs?.length ? p.imgs : p.img ? [p.img] : []
@@ -18,6 +18,8 @@ export default function CardShot({ p, children }) {
   const [visible, setVisible] = useState(false)
   const box = useRef(null)
   const timer = useRef(null)
+  const overArrow = useRef(false)
+  const closer = useRef(null)
 
   /* Solo corre el carrusel de las cards en pantalla */
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function CardShot({ p, children }) {
     }
   }, [zoom])
 
-  useEffect(() => () => clearTimeout(timer.current), [])
+  useEffect(() => () => { clearTimeout(timer.current); clearTimeout(closer.current) }, [])
 
   const openZoom = () => {
     const r = box.current.getBoundingClientRect()
@@ -63,19 +65,52 @@ export default function CardShot({ p, children }) {
     })
   }
 
+  /* El zoom tapa la card y tiene sus propias flechas, así que el mouse pasa de
+     una a otro: cerrar con un respiro evita que se cierre en ese cruce */
+  const cancelClose = () => clearTimeout(closer.current)
+  const closeSoon = () => {
+    clearTimeout(timer.current)
+    clearTimeout(closer.current)
+    closer.current = setTimeout(() => setZoom(null), 120)
+  }
+
   /* Solo mouse: en touch no hay hover y el toque es para el carrusel */
-  const onEnter = (e) => {
-    if (e.pointerType !== 'mouse' || !imgs.length) return
+  const startTimer = () => {
     clearTimeout(timer.current)
     timer.current = setTimeout(openZoom, ZOOM_DELAY_MS)
   }
-  const onLeave = () => {
-    clearTimeout(timer.current)
-    setZoom(null)
+  const onEnter = (e) => {
+    if (e.pointerType !== 'mouse' || !imgs.length) return
+    cancelClose()
+    overArrow.current = false
+    if (!zoom) startTimer()
+  }
+  /* Sobre las flechas de la card no se agranda (el zoom las taparía justo
+     antes del click). Al volver a la foto se arranca a contar de nuevo. */
+  const onMove = (e) => {
+    if (e.pointerType !== 'mouse' || zoom || e.target.closest('.shot-zoom')) return
+    const onArrow = Boolean(e.target.closest('.shot-arrow'))
+    if (onArrow === overArrow.current) return
+    overArrow.current = onArrow
+    onArrow ? clearTimeout(timer.current) : startTimer()
+  }
+  const go = (d) => (e) => {
+    e.stopPropagation()
+    setI((n) => (n + d + imgs.length) % imgs.length)
   }
 
+  const arrows = imgs.length > 1 && (
+    <>
+      <button className="shot-arrow prev" aria-label="Foto anterior" onClick={go(-1)}>‹</button>
+      <button className="shot-arrow next" aria-label="Foto siguiente" onClick={go(1)}>›</button>
+      <div className="shot-dots" aria-hidden="true">
+        {imgs.map((src, n) => <span key={src} className={n === i ? 'is-on' : ''} />)}
+      </div>
+    </>
+  )
+
   return (
-    <div className="card-shot" ref={box} onPointerEnter={onEnter} onPointerLeave={onLeave}>
+    <div className="card-shot" ref={box} onPointerEnter={onEnter} onPointerLeave={closeSoon} onPointerMove={onMove}>
       {imgs.length === 0 && <span className="placeholder-note">{p.shot}</span>}
       {imgs.map((src, n) => (
         <img
@@ -88,22 +123,12 @@ export default function CardShot({ p, children }) {
           decoding="async"
         />
       ))}
-      {imgs.length > 1 && (
-        <div className="shot-dots">
-          {imgs.map((src, n) => (
-            <button
-              key={src}
-              className={n === i ? 'is-on' : ''}
-              aria-label={`Foto ${n + 1} de ${imgs.length}`}
-              onClick={() => setI(n)}
-            />
-          ))}
-        </div>
-      )}
+      {arrows}
       {children}
       {zoom && createPortal(
-        <div className="shot-zoom" style={zoom} aria-hidden="true">
-          <img src={imgs[i]} alt="" />
+        <div className="shot-zoom" style={zoom} onPointerEnter={cancelClose} onPointerLeave={closeSoon}>
+          <img src={imgs[i]} alt={p.name} />
+          {arrows}
         </div>,
         document.body,
       )}
