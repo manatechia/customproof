@@ -5,6 +5,7 @@ import { discountFor, normalizeCode, packFor, PACK } from './discount.js'
 import { fetchCatalog } from './catalog.js'
 import { WhatsAppIcon, MailIcon, SmileyIcon, SearchIcon } from './components/Icons.jsx'
 import CartDrawer from './components/CartDrawer.jsx'
+import CardShot from './components/CardShot.jsx'
 
 const PAGE_SIZE = 30
 
@@ -419,11 +420,7 @@ export default function App() {
               <div className="featured-track" ref={track} onScroll={syncEdges}>
                 {featured.map((p) => (
                   <article className="card" key={p.id}>
-                    <div className="card-shot">
-                      {p.img
-                        ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" decoding="async" />
-                        : <span className="placeholder-note">{p.shot}</span>}
-                    </div>
+                    <CardShot p={p} />
                     <div className="card-body">
                       <div className="card-title-row">
                         <h3 className="card-name">{p.name}</h3>
@@ -520,12 +517,9 @@ export default function App() {
             ))}
             {!loading && pageItems.map((p) => (
               <article className="card" key={p.id}>
-                <div className="card-shot">
-                  {p.img
-                    ? <img className="card-img" src={p.img} alt={p.name} loading="lazy" decoding="async" />
-                    : <span className="placeholder-note">{p.shot}</span>}
+                <CardShot p={p}>
                   {p.tag && <span className="card-tag" style={{ background: p.tint }}>{p.tag}</span>}
-                </div>
+                </CardShot>
                 <div className="card-body">
                   <div className="card-title-row">
                     <h3 className="card-name">{p.name}</h3>

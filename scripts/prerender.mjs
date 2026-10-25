@@ -101,7 +101,7 @@ function buildJsonLd(products) {
           '@type': 'Product',
           name: p.name,
           ...(p.desc ? { description: p.desc } : {}),
-          ...(p.img ? { image: p.img } : {}),
+          ...(p.imgs.length ? { image: p.imgs.length > 1 ? p.imgs : p.img } : {}),
           category: p.cat,
           brand: { '@id': `${ORIGIN}/#business` },
           offers: {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { normalizeImg } from '../../lib/catalog.js'
+import { normalizeImg, splitImgs } from '../../lib/catalog.js'
 
 /* fetch que entiende el 401 como "sesión vencida" y no como error genérico */
 async function api(path, opts = {}) {
@@ -46,18 +46,29 @@ function Login({ onDone }) {
   )
 }
 
+/* Una celda "url1 | url2" se edita como una lista: la primera es la principal */
+const toList = (imagen) => {
+  const urls = splitImgs(imagen)
+  return urls.length ? urls : ['']
+}
+const toCell = (urls) => splitImgs(urls.join('|')).join(' | ')
+
 function ProductRow({ p, onSaved, onAuth }) {
-  const [url, setUrl] = useState(p.imagen)
+  const [urls, setUrls] = useState(() => toList(p.imagen))
   const [state, setState] = useState({ s: 'idle' })
-  const dirty = url.trim() !== p.imagen
-  const preview = url.trim() ? normalizeImg(url.trim()) : ''
+  const dirty = toCell(urls) !== toCell(splitImgs(p.imagen))
+
+  const edit = (next) => { setUrls(next); setState({ s: 'idle' }) }
+  const setAt = (n, v) => edit(urls.map((u, k) => (k === n ? v : u)))
+  const remove = (n) => edit(urls.length > 1 ? urls.filter((_, k) => k !== n) : [''])
+  const toFront = (n) => edit([urls[n], ...urls.filter((_, k) => k !== n)])
 
   const save = async () => {
     setState({ s: 'saving' })
     try {
-      const r = await api('admin-products', { method: 'PATCH', body: { id: p.id, field: 'imagen', value: url } })
+      const r = await api('admin-products', { method: 'PATCH', body: { id: p.id, field: 'imagen', value: urls } })
       onSaved(p.id, r.value)
-      setUrl(r.value)
+      setUrls(toList(r.value))
       setState({ s: 'ok' })
     } catch (err) {
       if (err.auth) return onAuth()
@@ -67,27 +78,47 @@ function ProductRow({ p, onSaved, onAuth }) {
 
   return (
     <li className={`adm-row${p.activo ? '' : ' adm-off'}`}>
-      <div className="adm-thumb">
-        {preview ? <img src={preview} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} onLoad={(e) => { e.currentTarget.style.visibility = 'visible' }} /> : <span>sin foto</span>}
-      </div>
       <div className="adm-body">
         <div className="adm-title">
           <strong>{p.titulo}</strong>
           <span className="adm-meta">{p.categoria || 'Otros'} · fila {p.fila}{p.activo ? '' : ' · inactivo'}</span>
         </div>
         {p.editable ? (
-          <div className="adm-edit">
-            <input
-              value={url}
-              onChange={(e) => { setUrl(e.target.value); setState({ s: 'idle' }) }}
-              onKeyDown={(e) => { if (e.key === 'Enter' && dirty) save() }}
-              placeholder="https://res.cloudinary.com/… o enlace de Drive"
-              inputMode="url"
-            />
-            <button className="adm-btn" onClick={save} disabled={!dirty || state.s === 'saving'}>
-              {state.s === 'saving' ? 'Guardando…' : 'Guardar'}
-            </button>
-          </div>
+          <>
+            <ul className="adm-urls">
+              {urls.map((u, n) => {
+                const preview = u.trim() ? normalizeImg(u.trim()) : ''
+                return (
+                  <li key={n} className="adm-url">
+                    <div className="adm-thumb">
+                      {preview
+                        ? <img src={preview} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} onLoad={(e) => { e.currentTarget.style.visibility = 'visible' }} />
+                        : <span>sin foto</span>}
+                      {n === 0 && urls.length > 1 && <span className="adm-main">principal</span>}
+                    </div>
+                    <input
+                      value={u}
+                      onChange={(e) => setAt(n, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' && dirty) save() }}
+                      placeholder="https://res.cloudinary.com/… o enlace de Drive"
+                      inputMode="url"
+                      aria-label={`Foto ${n + 1}`}
+                    />
+                    <div className="adm-url-actions">
+                      {n > 0 && <button className="adm-link" onClick={() => toFront(n)} title="Hacerla la foto principal">★</button>}
+                      {(urls.length > 1 || u) && <button className="adm-link" onClick={() => remove(n)} title="Quitar esta foto">✕</button>}
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+            <div className="adm-edit">
+              {urls.length < 10 && <button className="adm-link" onClick={() => edit([...urls, ''])}>+ Agregar foto</button>}
+              <button className="adm-btn" onClick={save} disabled={!dirty || state.s === 'saving'}>
+                {state.s === 'saving' ? 'Guardando…' : 'Guardar'}
+              </button>
+            </div>
+          </>
         ) : (
           <p className="adm-warn">{p.id ? `El id "${p.id}" está repetido en el sheet` : 'Cargá un id en el sheet para poder editarlo'}</p>
         )}
@@ -124,7 +155,7 @@ function Products({ onAuth, onLogout }) {
     <div className="adm-page">
       <header className="adm-header">
         <img src="/logo.png" alt="Custom Proof" className="adm-logo" />
-        <h1>Imágenes del catálogo</h1>
+        <h1>Fotos del catálogo</h1>
         <button className="adm-link" onClick={onLogout}>Salir</button>
       </header>
       <div className="adm-tools">

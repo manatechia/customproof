@@ -1,17 +1,19 @@
 import { requireAdmin } from '../lib/admin-auth.js'
 import { readRange, updateCell, catalogTabName, tabRange } from '../lib/sheets.js'
-import { normalizeImg } from '../lib/catalog.js'
+import { normalizeImg, splitImgs } from '../lib/catalog.js'
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
 
 /* Columnas que el admin puede escribir. Sumar precio, categoría, etc. es
    agregarlas acá con su validación y su input en src/admin/Admin.jsx */
 const EDITABLE = {
+  /* Varias fotos van en la misma celda separadas por " | " (ver splitImgs) */
   imagen: (v) => {
-    const s = String(v ?? '').trim()
-    if (s === '') return { ok: true, value: '' }
-    if (!/^https:\/\/\S+$/.test(s) || s.length > 1000) return { ok: false, error: 'La URL tiene que empezar con https://' }
-    return { ok: true, value: s }
+    const urls = splitImgs(Array.isArray(v) ? v.join('|') : v)
+    if (urls.length > 10) return { ok: false, error: 'Máximo 10 fotos por artículo' }
+    const bad = urls.find((u) => !/^https:\/\/\S+$/.test(u) || u.length > 1000)
+    if (bad) return { ok: false, error: `Esta URL no empieza con https://: ${bad.slice(0, 60)}` }
+    return { ok: true, value: urls.join(' | ') }
   },
 }
 
@@ -86,7 +88,7 @@ export async function PATCH(request) {
       return json({ error: matches.length ? 'Ese id está repetido en el sheet' : 'Ese producto ya no está en el sheet' }, 409)
     }
     await updateCell(tabRange(tab, `${colLetter(col[field])}${matches[0] + 1}`), v.value)
-    return json({ ok: true, value: v.value, img: field === 'imagen' && v.value ? normalizeImg(v.value) : undefined })
+    return json({ ok: true, value: v.value, imgs: field === 'imagen' ? splitImgs(v.value).map(normalizeImg) : undefined })
   } catch (e) {
     console.error('Admin: no se pudo guardar en el sheet:', e)
     return json({ error: 'No se pudo guardar en el sheet' }, 502)
