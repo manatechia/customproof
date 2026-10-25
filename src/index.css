@@ -157,6 +157,9 @@ h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
 .card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 10px; display: block; }
 /* Varias fotos: apiladas y la activa encima, con fundido entre una y otra */
 .card-shot .card-img { opacity: 0; transition: opacity .45s ease; }
+/* Pulsación larga = zoom (CardShot.jsx): sin seleccionar ni el menú de la imagen */
+.card-shot, .shot-zoom { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.card-shot img, .shot-zoom img { -webkit-user-drag: none; }
 .card-shot .card-img.is-on { opacity: 1; }
 .shot-dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 1; pointer-events: none; }
 .shot-dots span { width: 7px; height: 7px; border-radius: 999px; background: var(--muted-3); transition: background .2s, transform .2s; }

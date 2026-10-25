@@ -53,6 +53,10 @@
 .adm-table tbody tr:hover { background: var(--stripe-a); }
 .adm-table tr.is-sel { background: color-mix(in srgb, var(--celeste) 14%, transparent); }
 .adm-table tr.adm-off td { opacity: .55; }
+.adm-sortable button { background: none; border: none; padding: 0; font: inherit; color: inherit; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.adm-sortable button:hover, .adm-sortable[aria-sort="ascending"] button, .adm-sortable[aria-sort="descending"] button { color: var(--ink); }
+.adm-num.adm-sortable button { flex-direction: row-reverse; }
+.adm-sort-ind { font-size: 10px; min-width: 10px; }
 .adm-check { width: 36px; }
 .adm-id { color: var(--muted-2); font-variant-numeric: tabular-nums; }
 .adm-name { font-weight: 600; min-width: 180px; }

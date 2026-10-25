@@ -12,6 +12,48 @@ const BULK = {
   removeSub: 'Quitar la subcategoría',
 }
 
+/* Orden de la tabla. "Fecha" es la de alta: la hoja no guarda fechas, pero
+   cada producto nuevo va al final con el siguiente id, así que id más alto =
+   más nuevo. Los vacíos quedan siempre al final, en cualquier dirección. */
+const text = (a, b) => a.localeCompare(b, 'es', { sensitivity: 'base', numeric: true })
+const price = (p) => {
+  const n = parseFloat(String(p.precio).replace(',', '.'))
+  return Number.isFinite(n) ? n : null
+}
+const SORTS = {
+  fecha: { label: 'Fecha de alta', get: (p) => Number(p.id) || p.fila, cmp: (a, b) => a - b, first: 'desc' },
+  titulo: { label: 'Nombre', get: (p) => p.titulo, cmp: text, first: 'asc' },
+  categoria: { label: 'Categoría', get: (p) => p.categoria || null, cmp: text, first: 'asc' },
+  sub: { label: 'Subcategoría', get: (p) => [...p.subcategorias].sort(text).join(', ') || null, cmp: text, first: 'asc' },
+  precio: { label: 'Precio', get: price, cmp: (a, b) => a - b, first: 'asc' },
+}
+
+function sortProducts(list, { key, dir }) {
+  const s = SORTS[key]
+  const sign = dir === 'asc' ? 1 : -1
+  return [...list].sort((x, y) => {
+    const a = s.get(x)
+    const b = s.get(y)
+    if (a === null || b === null) return a === b ? 0 : a === null ? 1 : -1
+    /* A igual valor, por nombre: dentro de una categoría quedan ordenados */
+    return s.cmp(a, b) * sign || text(x.titulo, y.titulo)
+  })
+}
+
+/* Para el select: cada campo en sus dos direcciones */
+const SORT_OPTIONS = [
+  ['fecha', 'desc', 'Más nuevos primero'],
+  ['fecha', 'asc', 'Más viejos primero'],
+  ['titulo', 'asc', 'Nombre A → Z'],
+  ['titulo', 'desc', 'Nombre Z → A'],
+  ['categoria', 'asc', 'Categoría A → Z'],
+  ['categoria', 'desc', 'Categoría Z → A'],
+  ['sub', 'asc', 'Subcategoría A → Z'],
+  ['sub', 'desc', 'Subcategoría Z → A'],
+  ['precio', 'asc', 'Precio: menor a mayor'],
+  ['precio', 'desc', 'Precio: mayor a menor'],
+]
+
 export default function ProductsTab({ products, categories, reload, onAuth }) {
   const [q, setQ] = useState('')
   const [cat, setCat] = useState('')
@@ -22,18 +64,32 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
   const [bulk, setBulk] = useState({ op: 'categoria', value: '' })
   const [msg, setMsg] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [sort, setSort] = useState({ key: 'fecha', dir: 'desc' })
 
   const subsOfCat = cat && cat !== NO_CAT ? categories.find((c) => same(c.name, cat))?.subs ?? [] : []
 
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase()
-    return products.filter((p) =>
+    return sortProducts(products.filter((p) =>
       (!cat || (cat === NO_CAT ? !p.categoria : same(p.categoria, cat))) &&
       (!sub || p.subcategorias.some((s) => same(s, sub))) &&
       (!estado || (estado === 'on' ? p.activo : !p.activo)) &&
       (!t || `${p.titulo} ${p.id} ${p.subcategorias.join(' ')}`.toLowerCase().includes(t)),
-    )
-  }, [products, q, cat, sub, estado])
+    ), sort)
+  }, [products, q, cat, sub, estado, sort])
+
+  /* Click en una cabecera: primero en su dirección natural, otro click la invierte */
+  const sortBy = (key) => setSort((s) => (s.key === key
+    ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' }
+    : { key, dir: SORTS[key].first }))
+  const th = (k, children, className = '') => (
+    <th key={k} className={`${className} adm-sortable`} aria-sort={sort.key === k ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}>
+      <button onClick={() => sortBy(k)}>
+        {children}
+        <span className="adm-sort-ind">{sort.key === k ? (sort.dir === 'asc' ? '▲' : '▼') : ''}</span>
+      </button>
+    </th>
+  )
 
   const shownEditable = shown.filter((p) => p.editable)
   const allShownSelected = shownEditable.length > 0 && shownEditable.every((p) => selected.has(p.id))
@@ -89,6 +145,9 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
           <option value="on">Solo activos</option>
           <option value="off">Solo inactivos</option>
         </select>
+        <select value={`${sort.key}:${sort.dir}`} onChange={(e) => { const [key, dir] = e.target.value.split(':'); setSort({ key, dir }) }} aria-label="Ordenar por">
+          {SORT_OPTIONS.map(([k, d, label]) => <option key={`${k}:${d}`} value={`${k}:${d}`}>{label}</option>)}
+        </select>
         <button className="adm-btn" onClick={() => setEditing('new')}>+ Agregar producto</button>
       </div>
 
@@ -115,11 +174,11 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
             <tr>
               <th className="adm-check"><input type="checkbox" checked={allShownSelected} onChange={toggleAll} aria-label="Seleccionar todos los que se ven" /></th>
               <th>Foto</th>
-              <th>Id</th>
-              <th>Título</th>
-              <th>Categoría</th>
-              <th>Subcategorías</th>
-              <th className="adm-num">Precio</th>
+              {th('fecha', 'Id')}
+              {th('titulo', 'Título')}
+              {th('categoria', 'Categoría')}
+              {th('sub', 'Subcategorías')}
+              {th('precio', 'Precio', 'adm-num')}
               <th>Estado</th>
             </tr>
           </thead>
