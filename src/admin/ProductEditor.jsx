@@ -62,6 +62,20 @@ export default function ProductEditor({ product, categories, defaultCat, onClose
     }
   }
 
+  const remove = async () => {
+    if (!confirm(`¿Eliminar "${product.titulo}"?\n\nSe borra del sheet y deja de verse en la tienda. Si solo querés ocultarlo, desmarcá "Activo".`)) return
+    setBusy(true)
+    setError('')
+    try {
+      await api('admin-products', { method: 'DELETE', body: { ids: [product.id] } })
+      await onSaved(`Eliminado "${product.titulo}". Se puede recuperar desde el historial de versiones del sheet.`)
+    } catch (err) {
+      if (err.auth) return onAuth()
+      setError(err.message)
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="adm-modal" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <form className="adm-dialog" onSubmit={save} role="dialog" aria-modal="true" aria-label={product ? 'Editar producto' : 'Agregar producto'}>
@@ -109,6 +123,7 @@ export default function ProductEditor({ product, categories, defaultCat, onClose
 
         {error && <p className="adm-error">{error}</p>}
         <footer className="adm-dialog-foot">
+          {product && <button type="button" className="adm-link adm-danger adm-foot-left" onClick={remove} disabled={busy}>Eliminar producto</button>}
           <button type="button" className="adm-link" onClick={onClose}>Cancelar</button>
           <button className="adm-btn" disabled={busy}>{busy ? 'Guardando…' : product ? 'Guardar' : 'Agregar'}</button>
         </footer>

@@ -130,6 +130,25 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
     }
   }
 
+  const removeSelected = async () => {
+    const names = products.filter((p) => selected.has(p.id)).map((p) => p.titulo)
+    const list = names.slice(0, 8).join('\n· ') + (names.length > 8 ? `\n… y ${names.length - 8} más` : '')
+    if (!confirm(`¿Eliminar ${names.length} producto${names.length === 1 ? '' : 's'}?\n\n· ${list}\n\nSe borran del sheet y dejan de verse en la tienda.`)) return
+    setBusy(true)
+    setMsg(null)
+    try {
+      const r = await api('admin-products', { method: 'DELETE', body: { ids: [...selected] } })
+      setMsg({ ok: true, text: `Eliminado${r.count === 1 ? '' : 's'} ${r.count} producto${r.count === 1 ? '' : 's'}. Se pueden recuperar desde el historial de versiones del sheet.` })
+      setSelected(new Set())
+      await reload()
+    } catch (err) {
+      if (err.auth) return onAuth()
+      setMsg({ ok: false, text: err.message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <>
       <div className="adm-filters">
@@ -166,6 +185,7 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
           </select>
           <button className="adm-btn" onClick={applyBulk} disabled={!bulk.value || busy}>{busy ? 'Aplicando…' : 'Aplicar'}</button>
           <button className="adm-link" onClick={() => setSelected(new Set())}>Deseleccionar</button>
+          <button className="adm-link adm-danger adm-bulk-del" onClick={removeSelected} disabled={busy}>Eliminar</button>
         </div>
       )}
       {msg && <p className={msg.ok ? 'adm-ok' : 'adm-error'}>{msg.text}</p>}

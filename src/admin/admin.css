@@ -28,6 +28,9 @@
 .adm-link:hover { color: var(--yellow-text); }
 .adm-link:disabled { opacity: .45; cursor: default; }
 .adm-danger { color: #ff6b6b; }
+.adm-danger:hover { color: #ff3b3b; }
+.adm-foot-left, .adm-bulk-del { margin-right: auto; }
+.adm-bulk-del { margin-right: 0; margin-left: auto; }
 
 .adm-meta { color: var(--muted-2); font-size: 14px; }
 .adm-ok, .adm-error, .adm-warn { margin: 0 0 10px; font-size: 14px; }

@@ -1,5 +1,5 @@
 import { requireAdmin } from '../lib/admin-auth.js'
-import { readCatalog, readCategories, validateFields, writeProducts, addProduct, splitSubs } from '../lib/admin-catalog.js'
+import { readCatalog, readCategories, validateFields, writeProducts, addProduct, deleteProducts, splitSubs } from '../lib/admin-catalog.js'
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
 
@@ -92,6 +92,22 @@ export async function PATCH(request) {
     return r.error ? json({ error: r.error }, r.status) : json({ ok: true })
   } catch (e) {
     console.error('Admin: no se pudo guardar en el sheet:', e)
+    return json({ error: 'No se pudo guardar en el sheet' }, 502)
+  }
+}
+
+/* Eliminar: { ids: [...] } */
+export async function DELETE(request) {
+  const denied = requireAdmin(request)
+  if (denied) return denied
+  const b = await body(request)
+  const ids = Array.isArray(b?.ids) ? [...new Set(b.ids.map(String))] : []
+  if (!ids.length || ids.length > 500) return json({ error: 'Selección inválida' }, 400)
+  try {
+    const r = await deleteProducts(ids)
+    return r.error ? json({ error: r.error }, r.status) : json(r)
+  } catch (e) {
+    console.error('Admin: no se pudieron eliminar productos:', e)
     return json({ error: 'No se pudo guardar en el sheet' }, 502)
   }
 }
