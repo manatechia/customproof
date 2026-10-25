@@ -67,6 +67,14 @@
 .adm-subs { color: var(--muted-2); min-width: 140px; }
 .adm-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .adm-empty { padding: 16px; margin: 0; }
+/* Arrastrar para reordenar */
+.adm-handle-col { width: 32px; padding-right: 0 !important; cursor: default; }
+.adm-handle { background: none; border: none; color: var(--muted-3); font-size: 18px; line-height: 1; padding: 6px 4px; cursor: grab; touch-action: none; border-radius: 6px; }
+.adm-handle:hover, .adm-handle:focus-visible { color: var(--ink); background: var(--stripe-b); }
+.adm-handle:active { cursor: grabbing; }
+.adm-table tr.is-dragging td { opacity: .35; }
+.adm-table tr.drop-above td { box-shadow: inset 0 3px 0 var(--celeste); }
+.adm-table tr.drop-below td { box-shadow: inset 0 -3px 0 var(--celeste); }
 .adm-row-del { width: 44px; text-align: center; cursor: default; }
 .adm-del-btn { background: none; border: 2px solid transparent; border-radius: 999px; color: var(--muted-3); width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .adm-del-btn:hover, .adm-del-btn:focus-visible { color: #ff6b6b; border-color: #ff6b6b; }

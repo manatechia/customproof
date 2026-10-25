@@ -153,6 +153,59 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
     }
   }
 
+  /* Reordenar arrastrando la manija ⠿: el producto toma el lugar del de
+     destino y los del medio se corren, como mover una fila en Excel (ver
+     moveProduct en lib/admin-catalog.js). Solo con la tabla por fecha,
+     que es el orden de la tienda. Con pointer events anda igual con mouse
+     y con el dedo. */
+  const canDrag = sort.key === 'fecha'
+  const [drag, setDrag] = useState(null) /* { id, over } */
+
+  const move = async (id, to) => {
+    const a = products.find((p) => p.id === id)
+    const b = products.find((p) => p.id === to)
+    setBusy(true)
+    setMsg(null)
+    try {
+      await api('admin-products', { method: 'PATCH', body: { move: { id, to } } })
+      setMsg({ ok: true, text: `"${a?.titulo}" pasó al lugar de "${b?.titulo}". Se ve en la web en hasta 5 minutos.` })
+      setSelected(new Set())
+      await reload()
+    } catch (err) {
+      if (err.auth) return onAuth()
+      setMsg({ ok: false, text: err.message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const dragStart = (e, p) => {
+    if (busy || !p.editable) return
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDrag({ id: p.id, over: p.id })
+  }
+  const dragMove = (e) => {
+    if (!drag) return
+    /* Cerca de los bordes de la ventana, la página se desplaza sola */
+    if (e.clientY < 70) window.scrollBy(0, -12)
+    else if (e.clientY > window.innerHeight - 70) window.scrollBy(0, 12)
+    const tr = document.elementFromPoint(e.clientX, e.clientY)?.closest('tr[data-id]')
+    if (tr && tr.dataset.editable === '1' && tr.dataset.id !== drag.over) setDrag({ ...drag, over: tr.dataset.id })
+  }
+  const dragEnd = () => {
+    if (drag && drag.over !== drag.id) move(drag.id, drag.over)
+    setDrag(null)
+  }
+  /* Con teclado: flechas sobre la manija lo cambian por el de al lado */
+  const dragKey = (e, i) => {
+    const to = e.key === 'ArrowUp' ? shown[i - 1] : e.key === 'ArrowDown' ? shown[i + 1] : null
+    if (!to?.editable || busy) return
+    e.preventDefault()
+    move(shown[i].id, to.id)
+  }
+  const fromIndex = drag ? shown.findIndex((p) => p.id === drag.id) : -1
+
   return (
     <>
       <div className="adm-filters">
@@ -194,11 +247,17 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
       )}
       {msg && <p className={msg.ok ? 'adm-ok' : 'adm-error'}>{msg.text}</p>}
 
-      <p className="adm-meta">{shown.length} de {products.length} productos</p>
+      <p className="adm-meta">
+        {shown.length} de {products.length} productos ·{' '}
+        {canDrag
+          ? 'Arrastrá ⠿ para cambiar el orden de la tienda.'
+          : <>Para cambiar el orden de la tienda, <button className="adm-link" onClick={() => setSort({ key: 'fecha', dir: 'desc' })}>ordená por fecha</button> y arrastrá ⠿.</>}
+      </p>
       <div className="adm-table-wrap">
         <table className="adm-table">
           <thead>
             <tr>
+              {canDrag && <th className="adm-handle-col"><span className="adm-sr">Mover</span></th>}
               <th className="adm-check"><input type="checkbox" checked={allShownSelected} onChange={toggleAll} aria-label="Seleccionar todos los que se ven" /></th>
               <th>Foto</th>
               <th>Id</th>
@@ -212,11 +271,37 @@ export default function ProductsTab({ products, categories, reload, onAuth }) {
             </tr>
           </thead>
           <tbody>
-            {shown.map((p) => {
+            {shown.map((p, i) => {
               const img = splitImgs(p.imagen)[0]
               const n = splitImgs(p.imagen).length
+              /* Línea de destino: arriba si se sube en la tabla, abajo si se baja */
+              const target = drag && drag.over === p.id && drag.over !== drag.id
+              const dropCls = target ? (i < fromIndex ? ' drop-above' : ' drop-below') : ''
               return (
-                <tr key={`${p.fila}-${p.id}`} className={`${p.activo ? '' : 'adm-off'}${selected.has(p.id) ? ' is-sel' : ''}`} onClick={() => p.editable && setEditing(p)}>
+                <tr
+                  key={`${p.fila}-${p.id}`}
+                  data-id={p.id}
+                  data-editable={p.editable ? '1' : '0'}
+                  className={`${p.activo ? '' : 'adm-off'}${selected.has(p.id) ? ' is-sel' : ''}${drag?.id === p.id ? ' is-dragging' : ''}${dropCls}`}
+                  onClick={() => !drag && p.editable && setEditing(p)}
+                >
+                  {canDrag && (
+                    <td className="adm-handle-col" onClick={(e) => e.stopPropagation()}>
+                      {p.editable && (
+                        <button
+                          className="adm-handle"
+                          onPointerDown={(e) => dragStart(e, p)}
+                          onPointerMove={dragMove}
+                          onPointerUp={dragEnd}
+                          onPointerCancel={() => setDrag(null)}
+                          onKeyDown={(e) => dragKey(e, i)}
+                          disabled={busy}
+                          title="Arrastrá para mover (o usá las flechas del teclado)"
+                          aria-label={`Mover ${p.titulo}`}
+                        >⠿</button>
+                      )}
+                    </td>
+                  )}
                   <td className="adm-check" onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggle(p.id)} disabled={!p.editable} aria-label={`Seleccionar ${p.titulo}`} />
                   </td>

@@ -1,5 +1,5 @@
 import { requireAdmin } from '../lib/admin-auth.js'
-import { readCatalog, readCategories, validateFields, writeProducts, addProduct, deleteProducts, splitSubs } from '../lib/admin-catalog.js'
+import { readCatalog, readCategories, validateFields, writeProducts, addProduct, deleteProducts, moveProduct, splitSubs } from '../lib/admin-catalog.js'
 
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } })
 
@@ -43,7 +43,8 @@ export async function POST(request) {
   }
 }
 
-/* Edición. Dos formas:
+/* Edición. Tres formas:
+   - { move: { id, to } }: reordenar, como arrastrar una fila en Excel
    - { id, fields: { campo: valor } }: un producto, varios campos
    - { ids: [...], op, value }: varios productos a la vez, con op
      'categoria' (la reemplaza), 'addSub' o 'removeSub' */
@@ -54,6 +55,15 @@ export async function PATCH(request) {
   if (!b) return json({ error: 'Cuerpo inválido' }, 400)
 
   try {
+    /* Reordenar: { move: { id, to } } pone el producto `id` en la fila del producto `to` */
+    if (b.move) {
+      const id = String(b.move.id ?? '')
+      const to = String(b.move.to ?? '')
+      if (!id || !to) return json({ error: 'Movimiento inválido' }, 400)
+      const r = await moveProduct(id, to)
+      return r.error ? json({ error: r.error }, r.status) : json(r)
+    }
+
     if (Array.isArray(b.ids)) {
       const ids = [...new Set(b.ids.map(String))]
       if (!ids.length || ids.length > 500) return json({ error: 'Selección inválida' }, 400)
