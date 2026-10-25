@@ -1,18 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import { normalizeImg, splitImgs } from '../../lib/catalog.js'
-
-/* fetch que entiende el 401 como "sesión vencida" y no como error genérico */
-async function api(path, opts = {}) {
-  const res = await fetch(`/api/${path}`, {
-    ...opts,
-    headers: opts.body ? { 'Content-Type': 'application/json' } : undefined,
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
-  })
-  const data = await res.json().catch(() => ({}))
-  if (res.status === 401) throw Object.assign(new Error(data.error || 'Sesión vencida'), { auth: true })
-  if (!res.ok) throw new Error(data.error || `Error ${res.status}`)
-  return data
-}
+import { useEffect, useState } from 'react'
+import { api } from './api.js'
+import ProductsTab from './ProductsTab.jsx'
+import CategoriesTab from './CategoriesTab.jsx'
 
 function Login({ onDone }) {
   const [user, setUser] = useState('')
@@ -46,131 +35,53 @@ function Login({ onDone }) {
   )
 }
 
-/* Una celda "url1 | url2" se edita como una lista: la primera es la principal */
-const toList = (imagen) => {
-  const urls = splitImgs(imagen)
-  return urls.length ? urls : ['']
-}
-const toCell = (urls) => splitImgs(urls.join('|')).join(' | ')
+const TABS = { productos: 'Productos', categorias: 'Categorías' }
 
-function ProductRow({ p, onSaved, onAuth }) {
-  const [urls, setUrls] = useState(() => toList(p.imagen))
-  const [state, setState] = useState({ s: 'idle' })
-  const dirty = toCell(urls) !== toCell(splitImgs(p.imagen))
+function Dashboard({ onAuth, onLogout }) {
+  const [tab, setTab] = useState('productos')
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
 
-  const edit = (next) => { setUrls(next); setState({ s: 'idle' }) }
-  const setAt = (n, v) => edit(urls.map((u, k) => (k === n ? v : u)))
-  const remove = (n) => edit(urls.length > 1 ? urls.filter((_, k) => k !== n) : [''])
-  const toFront = (n) => edit([urls[n], ...urls.filter((_, k) => k !== n)])
-
-  const save = async () => {
-    setState({ s: 'saving' })
+  /* Después de cada guardado se relee todo: la hoja es la única fuente de verdad */
+  const load = async () => {
+    setError('')
     try {
-      const r = await api('admin-products', { method: 'PATCH', body: { id: p.id, field: 'imagen', value: urls } })
-      onSaved(p.id, r.value)
-      setUrls(toList(r.value))
-      setState({ s: 'ok' })
+      setData(await api('admin-products'))
     } catch (err) {
       if (err.auth) return onAuth()
-      setState({ s: 'error', msg: err.message })
+      setError(err.message)
     }
   }
-
-  return (
-    <li className={`adm-row${p.activo ? '' : ' adm-off'}`}>
-      <div className="adm-body">
-        <div className="adm-title">
-          <strong>{p.titulo}</strong>
-          <span className="adm-meta">{p.categoria || 'Otros'} · fila {p.fila}{p.activo ? '' : ' · inactivo'}</span>
-        </div>
-        {p.editable ? (
-          <>
-            <ul className="adm-urls">
-              {urls.map((u, n) => {
-                const preview = u.trim() ? normalizeImg(u.trim()) : ''
-                return (
-                  <li key={n} className="adm-url">
-                    <div className="adm-thumb">
-                      {preview
-                        ? <img src={preview} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = 'hidden' }} onLoad={(e) => { e.currentTarget.style.visibility = 'visible' }} />
-                        : <span>sin foto</span>}
-                      {n === 0 && urls.length > 1 && <span className="adm-main">principal</span>}
-                    </div>
-                    <input
-                      value={u}
-                      onChange={(e) => setAt(n, e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && dirty) save() }}
-                      placeholder="https://res.cloudinary.com/… o enlace de Drive"
-                      inputMode="url"
-                      aria-label={`Foto ${n + 1}`}
-                    />
-                    <div className="adm-url-actions">
-                      {n > 0 && <button className="adm-link" onClick={() => toFront(n)} title="Hacerla la foto principal">★</button>}
-                      {(urls.length > 1 || u) && <button className="adm-link" onClick={() => remove(n)} title="Quitar esta foto">✕</button>}
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-            <div className="adm-edit">
-              {urls.length < 10 && <button className="adm-link" onClick={() => edit([...urls, ''])}>+ Agregar foto</button>}
-              <button className="adm-btn" onClick={save} disabled={!dirty || state.s === 'saving'}>
-                {state.s === 'saving' ? 'Guardando…' : 'Guardar'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="adm-warn">{p.id ? `El id "${p.id}" está repetido en el sheet` : 'Cargá un id en el sheet para poder editarlo'}</p>
-        )}
-        {state.s === 'ok' && <p className="adm-ok">Guardado. Se ve en la web en hasta 5 minutos.</p>}
-        {state.s === 'error' && <p className="adm-error">{state.msg}</p>}
-      </div>
-    </li>
-  )
-}
-
-function Products({ onAuth, onLogout }) {
-  const [products, setProducts] = useState(null)
-  const [error, setError] = useState('')
-  const [q, setQ] = useState('')
-
-  const load = () => {
-    setError('')
-    api('admin-products')
-      .then(setProducts)
-      .catch((err) => (err.auth ? onAuth() : setError(err.message)))
-  }
-  useEffect(load, [])
-
-  const shown = useMemo(() => {
-    const t = q.trim().toLowerCase()
-    if (!products || !t) return products
-    return products.filter((p) => `${p.titulo} ${p.categoria} ${p.id}`.toLowerCase().includes(t))
-  }, [products, q])
-
-  const onSaved = (id, imagen) =>
-    setProducts((ps) => ps.map((p) => (p.id === id ? { ...p, imagen } : p)))
+  useEffect(() => { load() }, [])
 
   return (
     <div className="adm-page">
       <header className="adm-header">
         <img src="/logo.png" alt="Custom Proof" className="adm-logo" />
-        <h1>Fotos del catálogo</h1>
+        <nav className="adm-tabs" role="tablist">
+          {Object.entries(TABS).map(([k, label]) => (
+            <button key={k} role="tab" aria-selected={tab === k} className={`adm-tab${tab === k ? ' is-on' : ''}`} onClick={() => setTab(k)}>{label}</button>
+          ))}
+        </nav>
+        <button className="adm-link" onClick={load}>Recargar</button>
         <button className="adm-link" onClick={onLogout}>Salir</button>
       </header>
-      <div className="adm-tools">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nombre, categoría o id" type="search" />
-        <button className="adm-link" onClick={load}>Recargar</button>
-      </div>
+
       {error && <p className="adm-error">{error} <button className="adm-link" onClick={load}>Reintentar</button></p>}
-      {!products && !error && <p className="adm-meta">Cargando productos del sheet…</p>}
-      {shown && (
-        <ul className="adm-list">
-          {/* key con fila: dos filas sin id no pueden compartir clave */}
-          {shown.map((p) => <ProductRow key={`${p.fila}-${p.id}`} p={p} onSaved={onSaved} onAuth={onAuth} />)}
-        </ul>
+      {!data && !error && <p className="adm-meta">Cargando el sheet…</p>}
+      {data?.assigned > 0 && <p className="adm-ok">Se asignó id a {data.assigned} producto{data.assigned === 1 ? '' : 's'} (el número de su fila).</p>}
+
+      {data && tab === 'productos' && (
+        <ProductsTab products={data.products} categories={data.categories} reload={load} onAuth={onAuth} />
       )}
-      {shown && shown.length === 0 && <p className="adm-meta">Ningún producto coincide.</p>}
+      {data && tab === 'categorias' && (
+        <CategoriesTab
+          products={data.products}
+          categories={data.categories}
+          setCategories={(categories) => setData((d) => ({ ...d, categories }))}
+          onAuth={onAuth}
+        />
+      )}
     </div>
   )
 }
@@ -190,6 +101,6 @@ export default function Admin() {
 
   if (logged === null) return null
   return logged
-    ? <Products onAuth={() => setLogged(false)} onLogout={logout} />
+    ? <Dashboard onAuth={() => setLogged(false)} onLogout={logout} />
     : <Login onDone={() => setLogged(true)} />
 }
