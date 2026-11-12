@@ -4,7 +4,7 @@ import { eur } from './data.js'
    el carrito las muestra y el servidor las vuelve a calcular antes de
    registrar la venta (nunca se confía en lo que manda el navegador). */
 
-export const PICKUP = 'Metro L3 Liceu o L4 Llucmajor'
+export const PICKUP = 'zona Sagrada Familia o L4 Llucmajor'
 export const FREE_FROM = 25
 export const BCN_COST = 5
 export const ZONAS = ['bcn', 'fuera']
