@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/products", "destination": "https://www.customproof.es/api/products" }
+  ]
+}
