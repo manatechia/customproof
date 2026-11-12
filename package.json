@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/prerender.mjs && node scripts/build-clothes.mjs",
     "preview": "vite preview",
     "prerender": "node scripts/prerender.mjs",
-    "images": "node scripts/images.mjs"
+    "images": "node scripts/images.mjs",
+    "clothes": "npm --prefix clothes run dev"
   },
   "dependencies": {
     "react": "^19.2.8",

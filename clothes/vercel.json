@@ -1,5 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/products", "destination": "https://www.customproof.es/api/products" }
+    {
+      "source": "/api/products",
+      "destination": "https://www.customproof.es/api/products"
+    },
+    {
+      "source": "/clothes/:path*",
+      "destination": "/:path*"
+    }
   ]
 }
