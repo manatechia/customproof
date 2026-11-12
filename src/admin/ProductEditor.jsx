@@ -110,11 +110,11 @@ export default function ProductEditor({ product, categories, defaultCat, onClose
 
           <label className="adm-wide">Descripción<textarea rows={3} value={form.descripcion} onChange={(e) => set('descripcion', e.target.value)} /></label>
           <label>Etiqueta sobre la foto
-            <input value={form.tag} onChange={(e) => set('tag', e.target.value)} placeholder="Nuevo!" maxLength={40} />
+            <input value={form.tag} onChange={(e) => set('tag', e.target.value)} placeholder="-20%" maxLength={40} />
             {/* Un precio acá sale como cartelito arriba de la foto: casi siempre es un error de campo */}
             {/^\s*\d+([.,]\d+)?\s*€?\s*$/.test(form.tag)
               ? <span className="adm-warn">Esto parece un precio: va en el campo Precio, no acá.</span>
-              : <span className="adm-hint">El cartelito de arriba a la izquierda. Vacío = sin cartelito.</span>}
+              : <span className="adm-hint">El cartelito de arriba a la izquierda. "Nuevo!" se pone solo en los últimos 9 productos creados; acá va cualquier otra (gana sobre "Nuevo!").</span>}
           </label>
           <label>Orden<input value={form.orden} onChange={(e) => set('orden', e.target.value)} inputMode="numeric" /></label>
           <label className="adm-check-label"><input type="checkbox" checked={form.activo} onChange={(e) => set('activo', e.target.checked)} /> Activo (se ve en la tienda)</label>
